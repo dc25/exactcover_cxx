@@ -3,6 +3,6 @@
 
 const unsigned int MAXSPAN=5;
 
-typedef bool  BoolPic[MAXSPAN][MAXSPAN];
+typedef int BoolPic[MAXSPAN][MAXSPAN];
 
 #endif // BoolPIC_H__

@@ -20,17 +20,30 @@ class Unit : public ReferenceCounted
 class Cutout  : public ReferenceCounted
 {
   public:
-    Cutout (BoolPic a);
+    Cutout (const BoolPic a);
     std::vector<boost::intrusive_ptr<Unit> > m_units;
 };
 
 class Piece  : public ReferenceCounted
 {
   public:
-    Piece (BoolPic a[], size_t numPics, const char* id);
+    Piece(int id);
+    void addCutout(const boost::intrusive_ptr<Cutout>& oneCutout);
+
     std::vector<boost::intrusive_ptr<Cutout> > m_cutouts;
     bool inUse;
     std::string m_id;
 };
 
+
+class PieceSet : public ReferenceCounted
+{
+public:
+	PieceSet (const BoolPic a[], size_t numPics);
+	const boost::intrusive_ptr<Piece>& operator[](const int i) const;
+    const size_t size();
+
+private:
+	std::vector<boost::intrusive_ptr<Piece> > m_pieces;
+};
 #endif // Piece_h__
