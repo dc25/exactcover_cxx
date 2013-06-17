@@ -20,14 +20,14 @@ class Unit : public ReferenceCounted
 class Cutout  : public ReferenceCounted
 {
   public:
-    Cutout (const BoolPic a);
+    Cutout::Cutout(const BoolPic& a);
     std::vector<boost::intrusive_ptr<Unit> > m_units;
 };
 
 class Piece  : public ReferenceCounted
 {
   public:
-    Piece(int id);
+	Piece(const BoolPicSet& a, int index);
     void addCutout(const boost::intrusive_ptr<Cutout>& oneCutout);
 
     std::vector<boost::intrusive_ptr<Cutout> > m_cutouts;
@@ -39,7 +39,7 @@ class Piece  : public ReferenceCounted
 class PieceSet : public ReferenceCounted
 {
 public:
-	PieceSet (const BoolPic a[], size_t numPics);
+	PieceSet (const BoolPicSet a[], size_t numPicSets);
 	const boost::intrusive_ptr<Piece>& operator[](const int i) const;
     const size_t size();
 
