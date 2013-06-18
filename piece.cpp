@@ -25,7 +25,7 @@ Cutout::Cutout(const BoolPic& a)
         {
             if (a[row][col])
             {
-                intrusive_ptr<Unit> thisUnit= new Unit;
+                intrusive_ptr<Unit> thisUnit= new Unit();
                 m_units.push_back(thisUnit);
                 if (firstUnit == NULL)
                 {
@@ -46,7 +46,7 @@ Cutout::Cutout(const BoolPic& a)
 
 
 
-static bool isUsed(const BoolPic a)
+bool isUsed(const BoolPic a)
 {
     size_t numRow = MAXSPAN;
     size_t numCol = MAXSPAN;

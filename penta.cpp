@@ -7,6 +7,7 @@
 #include "BoolPic.h"
 #include "Piece.h"
 #include "pentominos.h"
+#include "Coverage.h"
 
 using namespace std;
 using namespace boost;
@@ -23,12 +24,16 @@ class Puzzle
     private:
         intrusive_ptr<Piece> m_puzzleUnits[10][6];
 		intrusive_ptr<PieceSet> m_pieces;
+		intrusive_ptr<DancingLinks> m_coverage;
+
 };
 
 Puzzle::Puzzle()
 {
 
     m_pieces = new PieceSet(pentominos, NELEM(pentominos));
+	m_coverage = new DancingLinks(pentominos, NELEM(pentominos), 10, 6);
+	m_coverage->search();
 
 }
 
@@ -161,6 +166,6 @@ void Puzzle::display()
 int main ()
 {
     Puzzle puzzle;
-    puzzle.solve();
+    // puzzle.solve();
 }
 
