@@ -18,7 +18,7 @@ public:
 	{
 	}
 
-	boost::intrusive_ptr<Cell> left, right, up, down, column;
+	CellPtr left, right, up, down, column;
 	unsigned int useCount;
 
 	unsigned int index;
@@ -34,7 +34,7 @@ class Placement  : public ReferenceCounted
 		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
 
     private:
-		std::vector<boost::intrusive_ptr<Cell> > m_uses;  // one entry for each piece and h*w entries for puzzle
+		std::vector<CellPtr > m_uses;  // one entry for each piece and h*w entries for puzzle
 	friend class Coverage;
 };
 
@@ -122,12 +122,12 @@ Coverage::Coverage (const BoolPicSet a[], unsigned int pieceCount, unsigned int 
     }
 }
 
-boost::intrusive_ptr<Cell> Coverage::ConnectLinks()
+CellPtr Coverage::ConnectLinks()
 {
 	for (auto p : m_placements)
 	{
-		boost::intrusive_ptr<Cell> first;
-		boost::intrusive_ptr<Cell> prev;
+		CellPtr first = NULL;
+		CellPtr prev = NULL;
 		for (auto u : p->m_uses)
 		{
 			if (u)
@@ -151,14 +151,14 @@ boost::intrusive_ptr<Cell> Coverage::ConnectLinks()
 
     auto colCount = m_placements[0]->m_uses.size();
 
-    boost::intrusive_ptr<Cell> root = new Cell();
+    CellPtr root = new Cell();
 
     auto firstCol = root;
     auto prevCol = root;
 
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
-        boost::intrusive_ptr<Cell> columnHead = new Cell();
+        CellPtr columnHead = new Cell();
 		columnHead->index = col;
 
         prevCol->right = columnHead;
@@ -188,7 +188,7 @@ boost::intrusive_ptr<Cell> Coverage::ConnectLinks()
 	return root;
 }
 
-static void uncover(boost::intrusive_ptr<Cell> c)
+static void uncover(CellPtr c)
 {
     for (auto r = c->up; r != c; r = r->up)
 	{
@@ -204,7 +204,7 @@ static void uncover(boost::intrusive_ptr<Cell> c)
 	c->right->left = c;
 }
 
-static void cover(boost::intrusive_ptr<Cell> c)
+static void cover(CellPtr c)
 {
 	c->right->left = c->left;
 	c->left->right = c->right;
