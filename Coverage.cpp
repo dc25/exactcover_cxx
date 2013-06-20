@@ -11,21 +11,6 @@
 
 class Coverage;
 
-class Cell : public ReferenceCounted {
-public:
-	Cell()
-		: useCount(0), index(0)
-	{
-	}
-
-	CellPtr left, right, up, down, column;
-	unsigned int useCount;
-
-	unsigned int index;
-
-	friend class Coverage;
-};
-
 
 class Placement  : public ReferenceCounted 
 {
@@ -158,14 +143,14 @@ CellPtr Coverage::ConnectLinks()
 
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
-        CellPtr columnHead = new Cell();
-		columnHead->index = col;
+        CellPtr colHead = new Cell();
+		colHead->index = col;
 
-        prevCol->right = columnHead;
-        columnHead->left = prevCol;
-        prevCol = columnHead;
+        prevCol->right = colHead;
+        colHead->left = prevCol;
+        prevCol = colHead;
 
-		auto prev = columnHead;
+		auto prev = colHead;
 		for (auto p : m_placements)
 		{
 			auto u = p->m_uses[col];
@@ -173,14 +158,14 @@ CellPtr Coverage::ConnectLinks()
 			{
                 prev->down = u;
                 u->up = prev;
-				u->column = columnHead;
-                ++columnHead->useCount;
+				u->col = colHead;
+                ++colHead->useCount;
                 prev = u;
 			}
 		}
-		prev -> down = columnHead;
-		columnHead -> up = prev;
-		columnHead -> column = columnHead;
+		prev -> down = colHead;
+		colHead -> up = prev;
+		colHead -> col = colHead;
 	}
 
     prevCol -> right = root;
@@ -195,7 +180,7 @@ static void uncover(CellPtr c)
 	{
         for (auto row_it = r->left; row_it != r; row_it = row_it->left)
         {
-			row_it->column->useCount++;
+			row_it->col->useCount++;
 			row_it->up->down = row_it;
 			row_it->down->up = row_it;
         }
@@ -215,7 +200,7 @@ static void cover(CellPtr c)
         {
 			row_it->down->up = row_it->up;
 			row_it->up->down = row_it->down;
-			row_it->column->useCount--;
+			row_it->col->useCount--;
         }
 
 	}
@@ -237,7 +222,7 @@ void DancingLinks::showSolution( )
 		auto row_it = r;
 		while (piece == -1)
 		{
-			auto index = row_it->column->index;
+			auto index = row_it->col->index;
 
 			if (index < m_pieceCount)
 			{
@@ -248,7 +233,7 @@ void DancingLinks::showSolution( )
 
 		while (true)
 		{
-			auto index = row_it->column->index;
+			auto index = row_it->col->index;
 
 			if (index < m_pieceCount)
 			{
@@ -275,37 +260,39 @@ void DancingLinks::showSolution( )
     std::cout << std::endl;
 }
 
+CellPtr DancingLinks::smallestCol( )
+{
+	auto minUse = UINT_MAX;
+    CellPtr smallest = NULL;
+    for (auto col = m_root->right; col != m_root; col = col->right)
+    {
+        if (col->useCount < minUse)
+        {
+            minUse = col->useCount;
+            smallest = col;
+        }
+    }
+    return smallest;
+}
+
 void DancingLinks::searchForward()
 {
-	while (m_root != m_root->right)
+    for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
 	{
-		// choose a column and cover it.
-		auto minUse = UINT_MAX;
-		auto useCol = m_root;
-		for (auto col = m_root->right; col != m_root; col = col->right)
-		{
-			if (col->useCount < minUse)
-			{
-				minUse = col->useCount;
-				useCol = col;
-			}
-		}
-		BOOST_ASSERT(useCol != m_root);
-
-		if (useCol == useCol->down)
+		if (smallest == smallest->down)
 		{
 			break;
 		}
 
-		cover(useCol);
+		cover(smallest);
 
-		auto row = useCol->down;
+		auto row = smallest->down;
 		m_solution.push_back(row);
 
 		// cover all the columns that share a row with this column
  		for (auto row_it = row->right; row_it != row; row_it = row_it->right)
 		{
-			cover(row_it->column);
+			cover(row_it->col);
 		}
 	}
 }
@@ -314,31 +301,30 @@ bool DancingLinks::backtrack()
 {
 	while (true)
 	{
-
 		// we are done using this row in this column so uncover the columns cooresponding to it.
 		auto row = m_solution.back();
 
 		for (auto row_it = row->left; row_it != row; row_it = row_it->left)
 		{
-			uncover(row_it->column);
+			uncover(row_it->col);
 		}
 
 		m_solution.pop_back();
 
 		row = row->down;
-		if (row != row->column)
+		if (row != row->col)
 		{
 			m_solution.push_back(row);
 			// if there is another row in this column then use it.
 			for (auto row_it = row->right; row_it != row; row_it = row_it->right)
 			{
-				cover(row_it->column);
+				cover(row_it->col);
 			}
 			return true;
 		} else
 		{
 			// we are done with this column so uncover it.
-			uncover(row->column);
+			uncover(row->col);
 		}
 		if (m_solution.size() == 0)
 		{
@@ -385,41 +371,32 @@ void DancingLinks::solve()
 
 void DancingLinks::search( )
 {
-    if (m_root == m_root->right)
+    auto smallest = smallestCol();
+
+    if (!smallest)
     {
         showSolution();
         return;
     }
 
-	auto minUse = UINT_MAX;
-    auto useCol = m_root;
-    for (auto col = m_root->right; col != m_root; col = col->right)
-    {
-        if (col->useCount < minUse)
-        {
-            minUse = col->useCount;
-            useCol = col;
-        }
-    }
-    BOOST_ASSERT(useCol != m_root);
-    cover(useCol);
+    cover(smallest);
 
-    for (auto row = useCol->down; row != useCol; row = row->down)
+    for (auto row = smallest->down; row != smallest; row = row->down)
     {
         m_solution.push_back(row);
         for (auto row_it = row->right; row_it != row; row_it = row_it->right)
         {
-            cover(row_it->column);
+            cover(row_it->col);
         }
         search();
         for (auto row_it = row->left; row_it != row; row_it = row_it->left)
         {
-            uncover(row_it->column);
+            uncover(row_it->col);
         }
 		m_solution.pop_back();
     }
 
-    uncover(useCol);
+    uncover(smallest);
 }
 
 DancingLinks::DancingLinks( const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
