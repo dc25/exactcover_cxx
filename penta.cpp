@@ -33,7 +33,7 @@ Puzzle::Puzzle()
 
     m_pieces = new PieceSet(pentominos, NELEM(pentominos));
 	m_coverage = new DancingLinks(pentominos, NELEM(pentominos), 10, 6);
-	m_coverage->search();
+	m_coverage->solve();
 
 }
 

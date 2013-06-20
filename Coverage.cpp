@@ -180,6 +180,7 @@ CellPtr Coverage::ConnectLinks()
 		}
 		prev -> down = columnHead;
 		columnHead -> up = prev;
+		columnHead -> column = columnHead;
 	}
 
     prevCol -> right = root;
@@ -221,15 +222,16 @@ static void cover(CellPtr c)
 
 }
 
+
 void DancingLinks::showSolution( )
 {
 
 	std::vector<unsigned int> display;
 	display.resize(m_rowCount * m_colCount, INT_MAX);
 
-	BOOST_ASSERT(solution.size() == m_pieceCount);
+	// BOOST_ASSERT(m_solution.size() == m_pieceCount);
 
-	for (auto r : solution)
+	for (auto r : m_solution)
 	{
         unsigned int piece = -1;
 		auto row_it = r;
@@ -273,6 +275,114 @@ void DancingLinks::showSolution( )
     std::cout << std::endl;
 }
 
+void DancingLinks::searchForward()
+{
+	while (m_root != m_root->right)
+	{
+		// choose a column and cover it.
+		auto minUse = UINT_MAX;
+		auto useCol = m_root;
+		for (auto col = m_root->right; col != m_root; col = col->right)
+		{
+			if (col->useCount < minUse)
+			{
+				minUse = col->useCount;
+				useCol = col;
+			}
+		}
+		BOOST_ASSERT(useCol != m_root);
+
+		if (useCol == useCol->down)
+		{
+			break;
+		}
+
+		cover(useCol);
+
+		auto row = useCol->down;
+		m_solution.push_back(row);
+
+		// cover all the columns that share a row with this column
+ 		for (auto row_it = row->right; row_it != row; row_it = row_it->right)
+		{
+			cover(row_it->column);
+		}
+	}
+}
+
+bool DancingLinks::backtrack()
+{
+	while (true)
+	{
+
+		// we are done using this row in this column so uncover the columns cooresponding to it.
+		auto row = m_solution.back();
+
+		for (auto row_it = row->left; row_it != row; row_it = row_it->left)
+		{
+			uncover(row_it->column);
+		}
+
+		m_solution.pop_back();
+
+		row = row->down;
+		if (row != row->column)
+		{
+			m_solution.push_back(row);
+			// if there is another row in this column then use it.
+			for (auto row_it = row->right; row_it != row; row_it = row_it->right)
+			{
+				cover(row_it->column);
+			}
+			return true;
+		} else
+		{
+			// we are done with this column so uncover it.
+			uncover(row->column);
+		}
+		if (m_solution.size() == 0)
+		{
+			// this happens when all the rows in all the columns have been inspected.
+			return false;
+		}
+	}
+}
+
+bool DancingLinks::getSolution( )
+{
+	if (m_root == m_root->right)
+	{
+		if (!backtrack())
+		{
+			return false;
+		}
+	}
+
+	while (true)
+	{
+		searchForward();
+
+		if (m_root == m_root->right)
+		{
+			return true;
+		}
+
+		if (!backtrack())
+		{
+			return false;
+		}
+	}
+    return true;
+}
+
+void DancingLinks::solve()
+{
+	while(getSolution())
+	{
+		showSolution();
+	}
+}
+
 void DancingLinks::search( )
 {
     if (m_root == m_root->right)
@@ -296,7 +406,7 @@ void DancingLinks::search( )
 
     for (auto row = useCol->down; row != useCol; row = row->down)
     {
-        solution.push_back(row);
+        m_solution.push_back(row);
         for (auto row_it = row->right; row_it != row; row_it = row_it->right)
         {
             cover(row_it->column);
@@ -306,7 +416,7 @@ void DancingLinks::search( )
         {
             uncover(row_it->column);
         }
-		solution.pop_back();
+		m_solution.pop_back();
     }
 
     uncover(useCol);
@@ -318,6 +428,5 @@ DancingLinks::DancingLinks( const BoolPicSet a[], unsigned int pieceCount, unsig
 	boost::intrusive_ptr<Coverage> coverage = new Coverage(a, pieceCount, rowCount, colCount);
 
 	m_root = coverage->ConnectLinks();
-
 
 }

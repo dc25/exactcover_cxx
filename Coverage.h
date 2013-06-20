@@ -27,15 +27,21 @@ class DancingLinks : public ReferenceCounted
 public:
 	DancingLinks(const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
 	void search( );
+	void solve();
+    bool getSolution();
 
 private:
 	unsigned int m_pieceCount;
     unsigned int m_rowCount; 
     unsigned int m_colCount;
 
+	void searchForward();
+	bool backtrack();
+
 	void showSolution();
 	CellPtr m_root;
-	std::vector<CellPtr > solution;
+
+	std::vector<CellPtr > m_solution;
 };
 
 
