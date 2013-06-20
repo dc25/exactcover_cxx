@@ -51,8 +51,8 @@ private:
     unsigned int m_colCount;
 
     CellPtr smallestCol();
-	void searchForward();
-	bool backtrack();
+	void advance();
+	bool backup();
 
 	bool solved() const
     {

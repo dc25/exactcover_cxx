@@ -174,7 +174,7 @@ CellPtr Coverage::ConnectLinks()
 	return root;
 }
 
-static void uncover(CellPtr c)
+static void link_col(CellPtr c)
 {
     for (auto r = c->up; r != c; r = r->up)
 	{
@@ -190,7 +190,7 @@ static void uncover(CellPtr c)
 	c->right->left = c;
 }
 
-static void cover(CellPtr c)
+static void unlink_col(CellPtr c)
 {
 	c->right->left = c->left;
 	c->left->right = c->right;
@@ -275,7 +275,7 @@ CellPtr DancingLinks::smallestCol( )
     return smallest;
 }
 
-void DancingLinks::searchForward()
+void DancingLinks::advance()
 {
     for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
 	{
@@ -284,32 +284,31 @@ void DancingLinks::searchForward()
 			break;
 		}
 
-		cover(smallest);
+		unlink_col(smallest);
 
 		auto row = smallest->down;
 		m_solution.push_back(row);
 
-		// cover all the columns that share a row with this column
+		// detach all the columns that share a row with this column
  		for (auto row_it = row->right; row_it != row; row_it = row_it->right)
 		{
-			cover(row_it->col);
+			unlink_col(row_it->col);
 		}
 	}
 }
 
-bool DancingLinks::backtrack()
+bool DancingLinks::backup()
 {
 	while (true)
 	{
-		// we are done using this row in this column so uncover the columns cooresponding to it.
 		auto row = m_solution.back();
+		m_solution.pop_back();
 
+		// we are done using this row in this column so put back the columns cooresponding to it.
 		for (auto row_it = row->left; row_it != row; row_it = row_it->left)
 		{
-			uncover(row_it->col);
+			link_col(row_it->col);
 		}
-
-		m_solution.pop_back();
 
 		row = row->down;
 		if (row != row->col)
@@ -318,13 +317,13 @@ bool DancingLinks::backtrack()
 			// if there is another row in this column then use it.
 			for (auto row_it = row->right; row_it != row; row_it = row_it->right)
 			{
-				cover(row_it->col);
+				unlink_col(row_it->col);
 			}
 			return true;
 		} else
 		{
-			// we are done with this column so uncover it.
-			uncover(row->col);
+			// we are done with this column so put it back .
+			link_col(row->col);
 		}
 		if (m_solution.size() == 0)
 		{
@@ -336,9 +335,9 @@ bool DancingLinks::backtrack()
 
 bool DancingLinks::getSolution( )
 {
-	if (m_root == m_root->right)
+	if (solved())
 	{
-		if (!backtrack())
+		if (!backup())
 		{
 			return false;
 		}
@@ -346,14 +345,14 @@ bool DancingLinks::getSolution( )
 
 	while (true)
 	{
-		searchForward();
+		advance();
 
-		if (m_root == m_root->right)
+		if (solved())
 		{
 			return true;
 		}
 
-		if (!backtrack())
+		if (!backup())
 		{
 			return false;
 		}
@@ -379,24 +378,24 @@ void DancingLinks::search( )
         return;
     }
 
-    cover(smallest);
+    unlink_col(smallest);
 
     for (auto row = smallest->down; row != smallest; row = row->down)
     {
         m_solution.push_back(row);
         for (auto row_it = row->right; row_it != row; row_it = row_it->right)
         {
-            cover(row_it->col);
+            unlink_col(row_it->col);
         }
         search();
         for (auto row_it = row->left; row_it != row; row_it = row_it->left)
         {
-            uncover(row_it->col);
+            link_col(row_it->col);
         }
 		m_solution.pop_back();
     }
 
-    uncover(smallest);
+    link_col(smallest);
 }
 
 DancingLinks::DancingLinks( const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
