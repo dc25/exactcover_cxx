@@ -6,36 +6,8 @@
 #include <vector>
 #include "boost/intrusive_ptr.hpp"
 
-class Placement;
 class Cell;
-
-// typedef boost::intrusive_ptr<Cell> CellPtr;
 typedef Cell* CellPtr;
-
-class Cell : public ReferenceCounted {
-public:
-	Cell()
-		: useCount(0), index(0)
-	{
-	}
-
-	CellPtr left, right, up, down, col;
-	unsigned int useCount;
-
-	unsigned int index;
-
-	friend class Coverage;
-};
-
-class Coverage : public ReferenceCounted
-{
-	public:
-	    Coverage (const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
-		CellPtr ConnectLinks();
-	private:
-	    std::vector<boost::intrusive_ptr<Placement> > m_placements;
-};
-
 
 class DancingLinks : public ReferenceCounted
 {
@@ -54,10 +26,7 @@ private:
 	void advance();
 	bool backup();
 
-	bool solved() const
-    {
-        return (m_root == m_root->right);
-    }
+	bool solved() const;
 
 	void showSolution();
 	CellPtr m_root;

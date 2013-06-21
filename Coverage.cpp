@@ -9,21 +9,56 @@
 #include <climits>
 
 
-class Coverage;
+class Grid;
+class GridRow;
+
+class Cell {
+public:
+	Cell()
+		: left(0), right(0), up(0), down(0), useCount(0), index(0)
+	{
+	}
+
+	CellPtr left, right, up, down, col;
+	unsigned int useCount;
+
+	unsigned int index;
+
+	friend class Grid;
+};
+
+class Grid : public ReferenceCounted
+{
+	public:
+	    Grid (const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
+		CellPtr ConnectLinks();
+		GridRow& operator[](unsigned int index)
+		{
+			return *(m_rows[index]);
+		}
+	private:
+	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
+};
 
 
-class Placement  : public ReferenceCounted 
+
+class GridRow  : public ReferenceCounted 
 {
 	public:
         bool initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount);
 		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
 
+		CellPtr& operator[](unsigned int index)
+		{
+			return m_cells[index];
+		}
+
     private:
-		std::vector<CellPtr > m_uses;  // one entry for each piece and h*w entries for puzzle
-	friend class Coverage;
+		std::vector<CellPtr > m_cells;  // one entry for each piece and h*w entries for puzzle
+	friend class Grid;
 };
 
-void Placement::show( int pieceCount, unsigned int rowCount, unsigned int colCount)
+void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount)
 {
 	std::cout << std::setw(3);
 	for (int i = 0; i < 12; ++i)
@@ -35,7 +70,7 @@ void Placement::show( int pieceCount, unsigned int rowCount, unsigned int colCou
 
 	for (int i = 0; i < pieceCount; ++i)
 	{
-		std::cout << std::setw(3) << (m_uses[i] ? 1 : 0);
+		std::cout << std::setw(3) << (m_cells[i] ? 1 : 0);
 	}
 	std::cout << std::endl << std::endl;
 
@@ -44,17 +79,17 @@ void Placement::show( int pieceCount, unsigned int rowCount, unsigned int colCou
 		for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)
 		{
 			unsigned int index = pieceCount + colVal * rowCount + rowVal;
-		    std::cout << std::setw(3) << (m_uses[index] ? 1 : 0);
+		    std::cout << std::setw(3) << (m_cells[index] ? 1 : 0);
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
 }
 	
-bool Placement::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount)
+bool GridRow::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount)
 {
-	m_uses.resize(pieceCount + rowCount * colCount); // 
-	m_uses[pieceIndex] = new Cell();
+	m_cells.resize(pieceCount + rowCount * colCount); // 
+	m_cells[pieceIndex] = new Cell();
 
 	for (int i = 0; i<NELEM(piecePic); ++i)
 	{
@@ -71,7 +106,7 @@ bool Placement::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, 
 					return false;
 				} else
 				{
-					m_uses[pieceCount + (col * rowCount) + row] = new Cell();
+					m_cells[pieceCount + (col * rowCount) + row] = new Cell();
 				}
 
 			}
@@ -82,7 +117,7 @@ bool Placement::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, 
 }
 
 
-Coverage::Coverage (const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
+Grid::Grid (const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
 {
     for (size_t p = 0; p < pieceCount; ++p)
     {
@@ -94,11 +129,11 @@ Coverage::Coverage (const BoolPicSet a[], unsigned int pieceCount, unsigned int 
 				{
 					for (unsigned int colVal = 0; colVal < colCount; ++colVal)
 					{
-						boost::intrusive_ptr<Placement> placement = new Placement;
-						if (placement->initialize(p, a[p][orientation], rowVal, colVal, pieceCount, rowCount, colCount))
+						boost::intrusive_ptr<GridRow> row = new GridRow;
+						if (row->initialize(p, a[p][orientation], rowVal, colVal, pieceCount, rowCount, colCount))
 						{
-							// placement->show(pieceCount, rowCount, colCount);
-							m_placements.push_back(placement);
+							// row->show(pieceCount, rowCount, colCount);
+							m_rows.push_back(row);
 						}
 					}
 				}
@@ -107,13 +142,13 @@ Coverage::Coverage (const BoolPicSet a[], unsigned int pieceCount, unsigned int 
     }
 }
 
-CellPtr Coverage::ConnectLinks()
+CellPtr Grid::ConnectLinks()
 {
-	for (auto p : m_placements)
+	for (auto p : m_rows)
 	{
 		CellPtr first = NULL;
 		CellPtr prev = NULL;
-		for (auto u : p->m_uses)
+		for (auto u : p->m_cells)
 		{
 			if (u)
 			{
@@ -134,7 +169,7 @@ CellPtr Coverage::ConnectLinks()
 		first -> left = prev;
 	}
 
-    auto colCount = m_placements[0]->m_uses.size();
+    auto colCount = m_rows[0]->m_cells.size();
 
     CellPtr root = new Cell();
 
@@ -151,9 +186,9 @@ CellPtr Coverage::ConnectLinks()
         prevCol = colHead;
 
 		auto prev = colHead;
-		for (auto p : m_placements)
+		for (auto p : m_rows)
 		{
-			auto u = p->m_uses[col];
+			auto u = p->m_cells[col];
 			if (u)
 			{
                 prev->down = u;
@@ -174,7 +209,7 @@ CellPtr Coverage::ConnectLinks()
 	return root;
 }
 
-static void link_col(CellPtr c)
+static void linkCol(CellPtr c)
 {
     for (auto r = c->up; r != c; r = r->up)
 	{
@@ -190,7 +225,7 @@ static void link_col(CellPtr c)
 	c->right->left = c;
 }
 
-static void unlink_col(CellPtr c)
+static void unlinkCol(CellPtr c)
 {
 	c->right->left = c->left;
 	c->left->right = c->right;
@@ -205,6 +240,27 @@ static void unlink_col(CellPtr c)
 
 	}
 
+}
+
+static void unlinkRow(CellPtr row)
+{
+    for (auto row_it = row->right; row_it != row; row_it = row_it->right)
+    {
+        unlinkCol(row_it->col);
+    }
+}
+
+static void linkRow(CellPtr row)
+{
+    for (auto row_it = row->left; row_it != row; row_it = row_it->left)
+    {
+        linkCol(row_it->col);
+    }
+}
+
+bool DancingLinks::solved() const
+{
+    return (m_root == m_root->right);
 }
 
 
@@ -284,53 +340,40 @@ void DancingLinks::advance()
 			break;
 		}
 
-		unlink_col(smallest);
+		unlinkCol(smallest);
 
 		auto row = smallest->down;
 		m_solution.push_back(row);
+        unlinkRow(row);
 
-		// detach all the columns that share a row with this column
- 		for (auto row_it = row->right; row_it != row; row_it = row_it->right)
-		{
-			unlink_col(row_it->col);
-		}
 	}
 }
 
 bool DancingLinks::backup()
 {
-	while (true)
+	while (m_solution.size())
 	{
 		auto row = m_solution.back();
 		m_solution.pop_back();
 
 		// we are done using this row in this column so put back the columns cooresponding to it.
-		for (auto row_it = row->left; row_it != row; row_it = row_it->left)
-		{
-			link_col(row_it->col);
-		}
+        linkRow(row);
 
 		row = row->down;
 		if (row != row->col)
 		{
-			m_solution.push_back(row);
 			// if there is another row in this column then use it.
-			for (auto row_it = row->right; row_it != row; row_it = row_it->right)
-			{
-				unlink_col(row_it->col);
-			}
+			m_solution.push_back(row);
+            unlinkRow(row);
 			return true;
 		} else
 		{
 			// we are done with this column so put it back .
-			link_col(row->col);
-		}
-		if (m_solution.size() == 0)
-		{
-			// this happens when all the rows in all the columns have been inspected.
-			return false;
+			linkCol(row->col);
 		}
 	}
+	// All columns were fully advanced so there's no more work to be done.
+    return false;
 }
 
 bool DancingLinks::getSolution( )
@@ -378,30 +421,30 @@ void DancingLinks::search( )
         return;
     }
 
-    unlink_col(smallest);
+    unlinkCol(smallest);
 
     for (auto row = smallest->down; row != smallest; row = row->down)
     {
         m_solution.push_back(row);
         for (auto row_it = row->right; row_it != row; row_it = row_it->right)
         {
-            unlink_col(row_it->col);
+            unlinkCol(row_it->col);
         }
         search();
         for (auto row_it = row->left; row_it != row; row_it = row_it->left)
         {
-            link_col(row_it->col);
+            linkCol(row_it->col);
         }
 		m_solution.pop_back();
     }
 
-    link_col(smallest);
+    linkCol(smallest);
 }
 
 DancingLinks::DancingLinks( const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
 	: m_pieceCount(pieceCount), m_rowCount(rowCount), m_colCount(colCount)
 {
-	boost::intrusive_ptr<Coverage> coverage = new Coverage(a, pieceCount, rowCount, colCount);
+	boost::intrusive_ptr<Grid> coverage = new Grid(a, pieceCount, rowCount, colCount);
 
 	m_root = coverage->ConnectLinks();
 
