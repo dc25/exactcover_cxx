@@ -32,10 +32,6 @@ class Grid : public ReferenceCounted
 	public:
 	    Grid (const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
 		CellPtr ConnectLinks();
-		GridRow& operator[](unsigned int index)
-		{
-			return *(m_rows[index]);
-		}
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
 };
@@ -48,13 +44,8 @@ class GridRow  : public ReferenceCounted
         bool initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount);
 		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
 
-		CellPtr& operator[](unsigned int index)
-		{
-			return m_cells[index];
-		}
-
     private:
-		std::vector<CellPtr > m_cells;  // one entry for each piece and h*w entries for puzzle
+		std::vector<CellPtr > m_uses;  // one entry for each piece and h*w entries for puzzle
 	friend class Grid;
 };
 
@@ -70,7 +61,7 @@ void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount
 
 	for (int i = 0; i < pieceCount; ++i)
 	{
-		std::cout << std::setw(3) << (m_cells[i] ? 1 : 0);
+		std::cout << std::setw(3) << (m_uses[i] ? 1 : 0);
 	}
 	std::cout << std::endl << std::endl;
 
@@ -79,7 +70,7 @@ void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount
 		for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)
 		{
 			unsigned int index = pieceCount + colVal * rowCount + rowVal;
-		    std::cout << std::setw(3) << (m_cells[index] ? 1 : 0);
+		    std::cout << std::setw(3) << (m_uses[index] ? 1 : 0);
 		}
 		std::cout << std::endl;
 	}
@@ -88,8 +79,8 @@ void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount
 	
 bool GridRow::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount)
 {
-	m_cells.resize(pieceCount + rowCount * colCount); // 
-	m_cells[pieceIndex] = new Cell();
+	m_uses.resize(pieceCount + rowCount * colCount); // 
+	m_uses[pieceIndex] = new Cell();
 
 	for (int i = 0; i<NELEM(piecePic); ++i)
 	{
@@ -106,7 +97,7 @@ bool GridRow::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, in
 					return false;
 				} else
 				{
-					m_cells[pieceCount + (col * rowCount) + row] = new Cell();
+					m_uses[pieceCount + (col * rowCount) + row] = new Cell();
 				}
 
 			}
@@ -148,7 +139,7 @@ CellPtr Grid::ConnectLinks()
 	{
 		CellPtr first = NULL;
 		CellPtr prev = NULL;
-		for (auto u : p->m_cells)
+		for (auto u : p->m_uses)
 		{
 			if (u)
 			{
@@ -169,7 +160,7 @@ CellPtr Grid::ConnectLinks()
 		first -> left = prev;
 	}
 
-    auto colCount = m_rows[0]->m_cells.size();
+    auto colCount = m_rows[0]->m_uses.size();
 
     CellPtr root = new Cell();
 
@@ -188,7 +179,7 @@ CellPtr Grid::ConnectLinks()
 		auto prev = colHead;
 		for (auto p : m_rows)
 		{
-			auto u = p->m_cells[col];
+			auto u = p->m_uses[col];
 			if (u)
 			{
                 prev->down = u;
