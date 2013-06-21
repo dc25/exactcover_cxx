@@ -30,8 +30,9 @@ public:
 class Grid : public ReferenceCounted
 {
 	public:
-	    Grid (const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
-		CellPtr ConnectLinks();
+		CellPtr connectLinks();
+        void Grid::addRow (const std::vector<bool>& usage);
+
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
 };
@@ -41,8 +42,8 @@ class Grid : public ReferenceCounted
 class GridRow  : public ReferenceCounted 
 {
 	public:
-        bool initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount);
-		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
+		void initialize(const std::vector<bool>& usage);
+ 		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
 
     private:
 		std::vector<CellPtr > m_uses;  // one entry for each piece and h*w entries for puzzle
@@ -77,63 +78,28 @@ void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount
 	std::cout << std::endl;
 }
 	
-bool GridRow::initialize(int pieceIndex, const BoolPic& piecePic, int rowVal, int colVal, int pieceCount, unsigned int rowCount, unsigned int colCount)
+void GridRow::initialize(const std::vector<bool>& usage)
 {
-	m_uses.resize(pieceCount + rowCount * colCount); // 
-	m_uses[pieceIndex] = new Cell();
-
-	for (int i = 0; i<NELEM(piecePic); ++i)
+    m_uses.resize(usage.size());
+	for (unsigned int i = 0; i<usage.size(); ++i)
 	{
-
-		for (int j = 0; j < NELEM(piecePic[0]); ++j)
-		{
-			bool u = piecePic[i][j];
-			if (u)
-			{
-				unsigned int row = rowVal + i;
-				unsigned int col = colVal + j;
-				if (row >= rowCount || col >= colCount)
-				{
-					return false;
-				} else
-				{
-					m_uses[pieceCount + (col * rowCount) + row] = new Cell();
-				}
-
-			}
-		}
-	}
-	// show(pieceCount, rowCount, colCount);
-	return true;
-}
-
-
-Grid::Grid (const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
-{
-    for (size_t p = 0; p < pieceCount; ++p)
-    {
-		for (size_t orientation = 0; orientation < NELEM(a[0]); ++orientation)
-		{
-			if(isUsed(a[p][orientation]))
-			{
-				for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)
-				{
-					for (unsigned int colVal = 0; colVal < colCount; ++colVal)
-					{
-						boost::intrusive_ptr<GridRow> row = new GridRow;
-						if (row->initialize(p, a[p][orientation], rowVal, colVal, pieceCount, rowCount, colCount))
-						{
-							// row->show(pieceCount, rowCount, colCount);
-							m_rows.push_back(row);
-						}
-					}
-				}
-			}
-		}
+        if (usage[i])
+        {
+            m_uses[i] = new Cell();
+        }
     }
 }
 
-CellPtr Grid::ConnectLinks()
+
+void Grid::addRow (const std::vector<bool>& usage)
+{
+    boost::intrusive_ptr<GridRow> row = new GridRow();
+    row->initialize(usage);
+    m_rows.push_back(row);
+}
+
+
+CellPtr Grid::connectLinks()
 {
 	for (auto p : m_rows)
 	{
@@ -396,6 +362,7 @@ bool DancingLinks::getSolution( )
 
 void DancingLinks::solve()
 {
+    m_root=m_grid->connectLinks();
 	while(getSolution())
 	{
 		showSolution();
@@ -432,11 +399,14 @@ void DancingLinks::search( )
     linkCol(smallest);
 }
 
-DancingLinks::DancingLinks( const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
+DancingLinks::DancingLinks( unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
 	: m_pieceCount(pieceCount), m_rowCount(rowCount), m_colCount(colCount)
 {
-	boost::intrusive_ptr<Grid> coverage = new Grid(a, pieceCount, rowCount, colCount);
-
-	m_root = coverage->ConnectLinks();
-
+	m_grid = new Grid();
 }
+
+void DancingLinks::addRow (const std::vector<bool>& usage)
+{
+    m_grid->addRow(usage);
+}
+

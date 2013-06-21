@@ -19,6 +19,7 @@ class Puzzle
 {
     public:
         Puzzle();
+		void initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount);
         void solve();
         void display();
     private:
@@ -28,11 +29,61 @@ class Puzzle
 
 };
 
+void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
+{
+    for (size_t p = 0; p < pieceCount; ++p)
+    {
+		for (size_t orientation = 0; orientation < NELEM(a[0]); ++orientation)
+		{
+            const BoolPic& piecePic = a[p][orientation];
+			if(isUsed(piecePic))
+			{
+				for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)
+				{
+					for (unsigned int colVal = 0; colVal < colCount; ++colVal)
+					{
+                        std::vector<bool> rowUsage;
+                        rowUsage.resize(pieceCount + rowCount * colCount); // 
+                        rowUsage[p] = true;
+
+                        auto skipRow = false;  // set to true if this piece goes out of bounds
+                        for (int i = 0; i<NELEM(piecePic) && !skipRow; ++i)
+                        {
+                            for (int j = 0; j < NELEM(piecePic[0]) && !skipRow; ++j)
+                            {
+                                bool u = piecePic[i][j];
+                                if (u)
+                                {
+                                    unsigned int row = rowVal + i;
+                                    unsigned int col = colVal + j;
+                                    if (row >= rowCount || col >= colCount) // bad placement
+                                    {
+                                        skipRow = true;
+                                    } else
+                                    {
+                                        rowUsage[pieceCount + (col * rowCount) + row] = true;
+                                    }
+
+                                }
+                            }
+                        }
+                        if (!skipRow)
+                        {
+                            m_coverage->addRow(rowUsage);
+                        }
+					}
+				}
+			}
+		}
+    }
+}
+
 Puzzle::Puzzle()
 {
 
     m_pieces = new PieceSet(pentominos, NELEM(pentominos));
-	m_coverage = new DancingLinks(pentominos, NELEM(pentominos), 10, 6);
+	m_coverage = new DancingLinks(NELEM(pentominos), 10, 6);
+    initialize(pentominos, NELEM(pentominos), 10, 6);
 	m_coverage->solve();
 
 }

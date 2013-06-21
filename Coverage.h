@@ -7,15 +7,17 @@
 #include "boost/intrusive_ptr.hpp"
 
 class Cell;
+class Grid;
 typedef Cell* CellPtr;
 
 class DancingLinks : public ReferenceCounted
 {
 public:
-	DancingLinks(const BoolPicSet a[], unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
+	DancingLinks(unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
 	void search( );
 	void solve();
     bool getSolution();
+    void addRow (const std::vector<bool>& usage);
 
 private:
 	unsigned int m_pieceCount;
@@ -32,6 +34,7 @@ private:
 	CellPtr m_root;
 
 	std::vector<CellPtr > m_solution;
+    boost::intrusive_ptr<Grid> m_grid;
 };
 
 
