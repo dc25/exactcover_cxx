@@ -13,7 +13,12 @@ typedef Cell* CellPtr;
 class DancingLinks : public ReferenceCounted
 {
 public:
-	DancingLinks(unsigned int pieceCount, unsigned int xSize, unsigned int ySize);
+	DancingLinks(
+        unsigned int pieceCount, 
+        unsigned int xSize, 
+        unsigned int ySize,
+        const std::vector< std::vector< int > >& usage);
+
 	void search( );
 	void solve();
     bool getSolution();

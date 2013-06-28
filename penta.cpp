@@ -19,7 +19,7 @@ class Puzzle
 {
     public:
         Puzzle();
-		void initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount);
+        void initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage);
         void solve();
         void display();
     private:
@@ -29,7 +29,7 @@ class Puzzle
 
 };
 
-void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
+void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage)
 {
     for (size_t p = 0; p < pieceCount; ++p)
     {
@@ -69,7 +69,7 @@ void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned 
                         }
                         if (!skipRow)
                         {
-                            m_coverage->addRow(rowUsage);
+                            usage.push_back(rowUsage);
                         }
 					}
 				}
@@ -80,12 +80,12 @@ void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned 
 
 Puzzle::Puzzle()
 {
-
     m_pieces = new PieceSet(pentominos, NELEM(pentominos));
-	m_coverage = new DancingLinks(NELEM(pentominos), 10, 6);
-    initialize(pentominos, NELEM(pentominos), 10, 6);
-	m_coverage->solve();
 
+    vector< vector< int > > usage;
+    initialize(pentominos, NELEM(pentominos), 10, 6, usage);
+	m_coverage = new DancingLinks(NELEM(pentominos), 10, 6, usage);
+	m_coverage->solve();
 }
 
 

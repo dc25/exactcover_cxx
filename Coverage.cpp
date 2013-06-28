@@ -30,8 +30,9 @@ public:
 class Grid : public ReferenceCounted
 {
 	public:
+        Grid( const std::vector< std::vector< int > >& usage);
 		CellPtr connectLinks();
-        void Grid::addRow (const std::vector<int>& usage);
+        void Grid::addRow (const std::vector<int>& r);
 
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
@@ -91,13 +92,20 @@ void GridRow::initialize(const std::vector<int>& usage)
 }
 
 
-void Grid::addRow (const std::vector<int>& usage)
+void Grid::addRow (const std::vector<int>& r)
 {
     boost::intrusive_ptr<GridRow> row = new GridRow();
-    row->initialize(usage);
+    row->initialize(r);
     m_rows.push_back(row);
 }
 
+Grid::Grid( const std::vector< std::vector< int > >& usage)
+{
+    for (auto r : usage)
+    {
+        addRow(r);
+    }
+}
 
 CellPtr Grid::connectLinks()
 {
@@ -399,10 +407,14 @@ void DancingLinks::search( )
     linkCol(smallest);
 }
 
-DancingLinks::DancingLinks( unsigned int pieceCount, unsigned int rowCount, unsigned int colCount)
-	: m_pieceCount(pieceCount), m_rowCount(rowCount), m_colCount(colCount)
+DancingLinks::DancingLinks(
+    unsigned int pieceCount, 
+    unsigned int xSize, 
+    unsigned int ySize,
+    const std::vector< std::vector< int > >& usage)
+	: m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	m_grid = new Grid();
+	m_grid = new Grid(usage);
 }
 
 void DancingLinks::addRow (const std::vector<int>& usage)
