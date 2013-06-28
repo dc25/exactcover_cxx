@@ -39,7 +39,7 @@ class Piece  : public ReferenceCounted
 class PieceSet : public ReferenceCounted
 {
 public:
-	PieceSet (const BoolPicSet a[], unsigned int pieceCount);
+	PieceSet (const Pentomino a[], unsigned int pieceCount);
 	const boost::intrusive_ptr<Piece>& operator[](const int i) const;
     const size_t size();
 

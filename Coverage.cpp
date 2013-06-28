@@ -128,7 +128,8 @@ CellPtr Grid::connectLinks()
 		first -> left = prev;
 	}
 
-    auto colCount = m_rows[0]->m_uses.size();
+	auto firstRow = m_rows[0];
+    auto colCount = firstRow->m_uses.size();
 
     CellPtr root = new Cell();
 

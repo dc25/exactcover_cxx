@@ -19,7 +19,7 @@ class Puzzle
 {
     public:
         Puzzle();
-        void initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage);
+        void initialize(const Pentomino a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage);
         void solve();
         void display();
     private:
@@ -28,13 +28,13 @@ class Puzzle
 
 };
 
-void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage)
+void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage)
 {
     for (size_t p = 0; p < pieceCount; ++p)
     {
-		for (size_t orientation = 0; orientation < NELEM(a[0]); ++orientation)
+		for (size_t orientation = 0; orientation < NELEM(a[0].m_rep); ++orientation)
 		{
-            const BoolPic& piecePic = a[p][orientation];
+			const BoolPic& piecePic = a[p].m_rep[orientation];
 			if(isUsed(piecePic))
 			{
 				for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)

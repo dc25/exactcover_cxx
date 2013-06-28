@@ -83,11 +83,11 @@ Piece::Piece(const BoolPicSet& a, int index)
 
 
 
-PieceSet::PieceSet (const BoolPicSet a[], unsigned int pieceCount)
+PieceSet::PieceSet (const Pentomino a[], unsigned int pieceCount)
 {
     for (size_t pic = 0; pic < pieceCount; ++pic)
     {
-        m_pieces.push_back(new Piece(a[pic], pic));
+		m_pieces.push_back(new Piece(a[pic].m_rep, pic));
     }
 }
 

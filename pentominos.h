@@ -5,6 +5,5 @@
 #include <vector>
 
 const unsigned int PIECE_COUNT=12;
-
-extern const BoolPicSet pentominos[PIECE_COUNT];
+extern const Pentomino pentominos[PIECE_COUNT];
 #endif //  pentominos_h__
