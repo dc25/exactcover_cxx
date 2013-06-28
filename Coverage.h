@@ -1,5 +1,5 @@
 #ifndef coverage_h__
-#define coverate_h__
+#define coverage_h__
 
 #include "utilities/ReferenceCounted.h"
 #include "BoolPic.h"
