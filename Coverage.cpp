@@ -32,7 +32,6 @@ class Grid : public ReferenceCounted
 	public:
         Grid( const std::vector< std::vector< int > >& usage);
 		CellPtr connectLinks();
-        void Grid::addRow (const std::vector<int>& r);
 
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
@@ -92,18 +91,13 @@ void GridRow::initialize(const std::vector<int>& usage)
 }
 
 
-void Grid::addRow (const std::vector<int>& r)
-{
-    boost::intrusive_ptr<GridRow> row = new GridRow();
-    row->initialize(r);
-    m_rows.push_back(row);
-}
-
 Grid::Grid( const std::vector< std::vector< int > >& usage)
 {
     for (auto r : usage)
     {
-        addRow(r);
+        boost::intrusive_ptr<GridRow> row = new GridRow();
+        row->initialize(r);
+        m_rows.push_back(row);
     }
 }
 
