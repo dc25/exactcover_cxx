@@ -42,7 +42,7 @@ void Puzzle::initialize(const BoolPicSet a[], unsigned int pieceCount, unsigned 
 				{
 					for (unsigned int colVal = 0; colVal < colCount; ++colVal)
 					{
-                        std::vector<bool> rowUsage;
+                        std::vector<int> rowUsage;
                         rowUsage.resize(pieceCount + rowCount * colCount); // 
                         rowUsage[p] = true;
 

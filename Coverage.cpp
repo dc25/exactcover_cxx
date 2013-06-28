@@ -31,7 +31,7 @@ class Grid : public ReferenceCounted
 {
 	public:
 		CellPtr connectLinks();
-        void Grid::addRow (const std::vector<bool>& usage);
+        void Grid::addRow (const std::vector<int>& usage);
 
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
@@ -42,7 +42,7 @@ class Grid : public ReferenceCounted
 class GridRow  : public ReferenceCounted 
 {
 	public:
-		void initialize(const std::vector<bool>& usage);
+		void initialize(const std::vector<int>& usage);
  		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
 
     private:
@@ -78,7 +78,7 @@ void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount
 	std::cout << std::endl;
 }
 	
-void GridRow::initialize(const std::vector<bool>& usage)
+void GridRow::initialize(const std::vector<int>& usage)
 {
     m_uses.resize(usage.size());
 	for (unsigned int i = 0; i<usage.size(); ++i)
@@ -91,7 +91,7 @@ void GridRow::initialize(const std::vector<bool>& usage)
 }
 
 
-void Grid::addRow (const std::vector<bool>& usage)
+void Grid::addRow (const std::vector<int>& usage)
 {
     boost::intrusive_ptr<GridRow> row = new GridRow();
     row->initialize(usage);
@@ -405,7 +405,7 @@ DancingLinks::DancingLinks( unsigned int pieceCount, unsigned int rowCount, unsi
 	m_grid = new Grid();
 }
 
-void DancingLinks::addRow (const std::vector<bool>& usage)
+void DancingLinks::addRow (const std::vector<int>& usage)
 {
     m_grid->addRow(usage);
 }

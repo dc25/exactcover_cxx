@@ -17,7 +17,7 @@ public:
 	void search( );
 	void solve();
     bool getSolution();
-    void addRow (const std::vector<bool>& usage);
+    void addRow (const std::vector<int>& usage);
 
 private:
 	unsigned int m_pieceCount;
