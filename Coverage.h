@@ -7,7 +7,6 @@
 #include "boost/intrusive_ptr.hpp"
 
 class Cell;
-class Grid;
 typedef Cell* CellPtr;
 
 class DancingLinks : public ReferenceCounted
@@ -22,7 +21,6 @@ public:
 	void search( );
 	void solve();
     bool getSolution();
-    void addRow (const std::vector<int>& usage);
 
 private:
 	unsigned int m_pieceCount;
@@ -39,7 +37,6 @@ private:
 	CellPtr m_root;
 
 	std::vector<CellPtr > m_solution;
-    boost::intrusive_ptr<Grid> m_grid;
 };
 
 

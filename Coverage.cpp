@@ -370,7 +370,6 @@ bool DancingLinks::getSolution( )
 
 void DancingLinks::solve()
 {
-    m_root=m_grid->connectLinks();
 	while(getSolution())
 	{
 		showSolution();
@@ -414,11 +413,6 @@ DancingLinks::DancingLinks(
     const std::vector< std::vector< int > >& usage)
 	: m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	m_grid = new Grid(usage);
+	boost::intrusive_ptr<Grid> grid = new Grid(usage);
+	m_root= grid->connectLinks();
 }
-
-void DancingLinks::addRow (const std::vector<int>& usage)
-{
-    m_grid->addRow(usage);
-}
-

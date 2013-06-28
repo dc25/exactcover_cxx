@@ -25,7 +25,6 @@ class Puzzle
     private:
         intrusive_ptr<Piece> m_puzzleUnits[10][6];
 		intrusive_ptr<PieceSet> m_pieces;
-		intrusive_ptr<DancingLinks> m_coverage;
 
 };
 
@@ -84,8 +83,8 @@ Puzzle::Puzzle()
 
     vector< vector< int > > usage;
     initialize(pentominos, NELEM(pentominos), 10, 6, usage);
-	m_coverage = new DancingLinks(NELEM(pentominos), 10, 6, usage);
-	m_coverage->solve();
+	intrusive_ptr<DancingLinks> coverage = new DancingLinks(NELEM(pentominos), 10, 6, usage);
+	coverage->solve();
 }
 
 
