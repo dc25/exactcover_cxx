@@ -30,8 +30,7 @@ public:
 class Grid : public ReferenceCounted
 {
 	public:
-        Grid( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns);
-		CellPtr connectLinks();
+		CellPtr connectLinks( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns);
 
 	private:
 	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
@@ -90,8 +89,7 @@ void GridRow::initialize(const std::vector<int>& usage)
     }
 }
 
-
-Grid::Grid( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
+CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
 {
     for (auto r : usage)
     {
@@ -99,10 +97,7 @@ Grid::Grid( const std::vector< std::vector< int > >& usage, const std::vector< s
         row->initialize(r);
         m_rows.push_back(row);
     }
-}
 
-CellPtr Grid::connectLinks()
-{
 	for (auto p : m_rows)
 	{
 		CellPtr first = NULL;
@@ -409,6 +404,6 @@ DancingLinks::DancingLinks(
     const std::vector< std::string >& columns)
       : m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	boost::intrusive_ptr<Grid> grid = new Grid(usage, columns);
-	m_root= grid->connectLinks();
+	boost::intrusive_ptr<Grid> grid = new Grid();
+	m_root= grid->connectLinks(usage, columns);
 }
