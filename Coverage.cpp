@@ -30,7 +30,7 @@ public:
 class Grid : public ReferenceCounted
 {
 	public:
-        Grid( const std::vector< std::vector< int > >& usage);
+        Grid( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns);
 		CellPtr connectLinks();
 
 	private:
@@ -91,7 +91,7 @@ void GridRow::initialize(const std::vector<int>& usage)
 }
 
 
-Grid::Grid( const std::vector< std::vector< int > >& usage)
+Grid::Grid( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
 {
     for (auto r : usage)
     {
@@ -405,9 +405,10 @@ DancingLinks::DancingLinks(
     unsigned int pieceCount, 
     unsigned int xSize, 
     unsigned int ySize,
-    const std::vector< std::vector< int > >& usage)
-	: m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
+    const std::vector< std::vector< int > >& usage,
+    const std::vector< std::string >& columns)
+      : m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	boost::intrusive_ptr<Grid> grid = new Grid(usage);
+	boost::intrusive_ptr<Grid> grid = new Grid(usage, columns);
 	m_root= grid->connectLinks();
 }

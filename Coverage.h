@@ -16,7 +16,8 @@ public:
         unsigned int pieceCount, 
         unsigned int xSize, 
         unsigned int ySize,
-        const std::vector< std::vector< int > >& usage);
+        const std::vector< std::vector< int > >& usage,
+        const std::vector< std::string >& columns);
 
 	void search( );
 	void solve();
