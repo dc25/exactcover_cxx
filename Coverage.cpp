@@ -91,75 +91,78 @@ void GridRow::initialize(const std::vector<int>& usage)
 
 CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
 {
-    for (auto r : usage)
-    {
-        boost::intrusive_ptr<GridRow> row = new GridRow();
-        row->initialize(r);
-        m_rows.push_back(row);
-    }
-
-	for (auto p : m_rows)
-	{
-		CellPtr first = NULL;
-		CellPtr prev = NULL;
-		for (auto u : p->m_uses)
-		{
-			if (u)
-			{
-				if (!first)
-				{
-					first = u;
-					prev = u;
-					continue;
-				} else
-				{
-					prev->right = u;
-					u->left = prev;
-                    prev = u;
-				} 
-			}
-		}
-		prev -> right = first;
-		first -> left = prev;
-	}
-
-	auto firstRow = m_rows[0];
-    auto colCount = firstRow->m_uses.size();
-
     CellPtr root = new Cell();
+	root->left = root;
 
-    auto firstCol = root;
-    auto prevCol = root;
+	auto colCount = columns.size();
+	auto rowCount = usage.size();
 
+	// connect the column head links
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
-        CellPtr colHead = new Cell();
-		colHead->index = col;
+        CellPtr column = new Cell();
+		// column->name = columns[col];
+		column->index = col;
+		column->col = column;
 
-        prevCol->right = colHead;
-        colHead->left = prevCol;
-        prevCol = colHead;
+		column->up = column;
 
-		auto prev = colHead;
-		for (auto p : m_rows)
+        column->right = root;
+        column->left = root->left;
+		column->left->right = column;
+		root->left = column;
+		if (!root->right)
 		{
-			auto u = p->m_uses[col];
-			if (u)
-			{
-                prev->down = u;
-                u->up = prev;
-				u->col = colHead;
-                ++colHead->useCount;
-                prev = u;
-			}
+			root->right = column;
 		}
-		prev -> down = colHead;
-		colHead -> up = prev;
-		colHead -> col = colHead;
 	}
 
-    prevCol -> right = root;
-    root -> left = prevCol;
+
+	// for each row ...
+	for (unsigned int row = 0; row < rowCount; ++row)
+	{
+	    CellPtr column = root->right;
+		CellPtr firstInRow = NULL;
+		auto usageRow = usage[row];
+		assert(colCount == usageRow.size());
+		// link up a Cell for each row entry that is used.
+		for (unsigned int col = 0; col < colCount; ++col)
+		{
+			assert(column != root);
+			if (usageRow[col])
+			{
+				CellPtr e = new Cell();
+				e->col = column;
+				++(column->useCount);
+				if (!firstInRow)
+				{
+					firstInRow = e;
+					e->left = e;
+				} else
+				{
+					e->right = firstInRow;
+					e->left = firstInRow->left;
+				    e->left->right = e;
+					firstInRow->left = e;
+					if (!firstInRow->right)
+					{
+						firstInRow->right = e;
+					}
+				}
+				e->down = column;
+				e->up = column->up;
+				e->up->down = e;
+				column->up = e;
+				if (!column->down)
+				{
+					column->down = e;
+				}
+			}
+			column=column->right;
+			// assert(column != root);
+		}
+		assert (column == root);
+	}
 
 	return root;
 }
