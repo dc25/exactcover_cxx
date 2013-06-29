@@ -9,7 +9,8 @@
 #include <climits>
 
 
-class Grid;
+class Cell;
+typedef Cell* CellPtr;
 
 class Cell {
 public:
@@ -23,21 +24,15 @@ public:
 
 	unsigned int index;
 
-	friend class Grid;
 };
 
-class Grid : public ReferenceCounted
+void DancingLinks::connectLinks(
+    const std::vector< std::vector< int > >& usage, 
+    const std::vector< std::string >& columns)
 {
-	public:
-		CellPtr connectLinks( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns);
-
-};
-
-
-CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
-{
-    CellPtr root = new Cell();
+    auto root = new Cell();
 	root->left = root;
+	root->right = root;
 
 	auto colCount = columns.size();
 	auto rowCount = usage.size();
@@ -45,7 +40,7 @@ CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const
 	// connect the column head links
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
-        CellPtr column = new Cell();
+        auto column = new Cell();
 		// column->name = columns[col];
 		column->index = col;
 		column->col = column;
@@ -54,20 +49,16 @@ CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const
 
         column->right = root;
         column->left = root->left;
+		column->right->left = column;
 		column->left->right = column;
-		root->left = column;
-		if (!root->right)
-		{
-			root->right = column;
-		}
-	}
 
+	}
 
 	// for each row ...
 	for (unsigned int row = 0; row < rowCount; ++row)
 	{
-	    CellPtr column = root->right;
-		CellPtr firstInRow = NULL;
+	    auto column = root->right;
+		Cell* firstInRow = NULL;
 		auto usageRow = usage[row];
 		assert(colCount == usageRow.size());
 		// link up a Cell for each row entry that is used.
@@ -76,43 +67,37 @@ CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const
 			assert(column != root);
 			if (usageRow[col])
 			{
-				CellPtr e = new Cell();
+				auto e = new Cell();
 				e->col = column;
 				++(column->useCount);
 				if (!firstInRow)
 				{
 					firstInRow = e;
 					e->left = e;
+					e->right = e;
 				} else
 				{
-					e->right = firstInRow;
-					e->left = firstInRow->left;
-				    e->left->right = e;
-					firstInRow->left = e;
-					if (!firstInRow->right)
-					{
-						firstInRow->right = e;
-					}
+
+                    e->right = firstInRow;
+                    e->left = firstInRow->left;
+                    e->right->left = e;
+                    e->left->right = e;
+
 				}
 				e->down = column;
 				e->up = column->up;
+				e->down->up = e;
 				e->up->down = e;
-				column->up = e;
-				if (!column->down)
-				{
-					column->down = e;
-				}
 			}
 			column=column->right;
-			// assert(column != root);
 		}
 		assert (column == root);
 	}
 
-	return root;
+	m_root = root;
 }
 
-static void linkCol(CellPtr c)
+static void linkCol(Cell* c)
 {
     for (auto r = c->up; r != c; r = r->up)
 	{
@@ -128,7 +113,7 @@ static void linkCol(CellPtr c)
 	c->right->left = c;
 }
 
-static void unlinkCol(CellPtr c)
+static void unlinkCol(Cell* c)
 {
 	c->right->left = c->left;
 	c->left->right = c->right;
@@ -145,7 +130,7 @@ static void unlinkCol(CellPtr c)
 
 }
 
-static void unlinkRow(CellPtr row)
+static void unlinkRow(Cell* row)
 {
     for (auto row_it = row->right; row_it != row; row_it = row_it->right)
     {
@@ -153,7 +138,7 @@ static void unlinkRow(CellPtr row)
     }
 }
 
-static void linkRow(CellPtr row)
+static void linkRow(Cell* row)
 {
     for (auto row_it = row->left; row_it != row; row_it = row_it->left)
     {
@@ -181,7 +166,7 @@ void DancingLinks::showSolution( )
 		auto row_it = r;
 		while (piece == -1)
 		{
-			auto index = row_it->col->index;
+			unsigned int index = row_it->col->index;
 
 			if (index < m_pieceCount)
 			{
@@ -192,7 +177,7 @@ void DancingLinks::showSolution( )
 
 		while (true)
 		{
-			auto index = row_it->col->index;
+			unsigned int index = row_it->col->index;
 
 			if (index < m_pieceCount)
 			{
@@ -219,10 +204,10 @@ void DancingLinks::showSolution( )
     std::cout << std::endl;
 }
 
-CellPtr DancingLinks::smallestCol( )
+Cell* DancingLinks::smallestCol( )
 {
 	auto minUse = UINT_MAX;
-    CellPtr smallest = NULL;
+    Cell* smallest = NULL;
     for (auto col = m_root->right; col != m_root; col = col->right)
     {
         if (col->useCount < minUse)
@@ -248,7 +233,6 @@ void DancingLinks::advance()
 		auto row = smallest->down;
 		m_solution.push_back(row);
         unlinkRow(row);
-
 	}
 }
 
@@ -352,6 +336,5 @@ DancingLinks::DancingLinks(
     const std::vector< std::string >& columns)
       : m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	boost::intrusive_ptr<Grid> grid = new Grid();
-	m_root= grid->connectLinks(usage, columns);
+	connectLinks(usage, columns);
 }

@@ -7,7 +7,6 @@
 #include "boost/intrusive_ptr.hpp"
 
 class Cell;
-typedef Cell* CellPtr;
 
 class DancingLinks : public ReferenceCounted
 {
@@ -28,16 +27,20 @@ private:
     unsigned int m_rowCount; 
     unsigned int m_colCount;
 
-    CellPtr smallestCol();
+    void connectLinks( 
+        const std::vector< std::vector< int > >& usage, 
+        const std::vector< std::string >& columns);
+
+    Cell* smallestCol();
 	void advance();
 	bool backup();
 
 	bool solved() const;
 
 	void showSolution();
-	CellPtr m_root;
+	Cell* m_root;
 
-	std::vector<CellPtr > m_solution;
+	std::vector<Cell* > m_solution;
 };
 
 
