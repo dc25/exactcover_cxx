@@ -10,7 +10,6 @@
 
 
 class Grid;
-class GridRow;
 
 class Cell {
 public:
@@ -32,62 +31,8 @@ class Grid : public ReferenceCounted
 	public:
 		CellPtr connectLinks( const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns);
 
-	private:
-	    std::vector<boost::intrusive_ptr<GridRow> > m_rows;
 };
 
-
-
-class GridRow  : public ReferenceCounted 
-{
-	public:
-		void initialize(const std::vector<int>& usage);
- 		void show( int pieceCount, unsigned int rowCount, unsigned int colCount);
-
-    private:
-		std::vector<CellPtr > m_uses;  // one entry for each piece and h*w entries for puzzle
-	friend class Grid;
-};
-
-void GridRow::show( int pieceCount, unsigned int rowCount, unsigned int colCount)
-{
-	std::cout << std::setw(3);
-	for (int i = 0; i < 12; ++i)
-	{
-		std::cout << std::setw(3) << i;
-	}
-
-	std::cout << std::endl;
-
-	for (int i = 0; i < pieceCount; ++i)
-	{
-		std::cout << std::setw(3) << (m_uses[i] ? 1 : 0);
-	}
-	std::cout << std::endl << std::endl;
-
-	for (unsigned int colVal = 0; colVal < colCount; ++colVal)
-	{
-		for (unsigned int rowVal = 0; rowVal < rowCount; ++rowVal)
-		{
-			unsigned int index = pieceCount + colVal * rowCount + rowVal;
-		    std::cout << std::setw(3) << (m_uses[index] ? 1 : 0);
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}
-	
-void GridRow::initialize(const std::vector<int>& usage)
-{
-    m_uses.resize(usage.size());
-	for (unsigned int i = 0; i<usage.size(); ++i)
-	{
-        if (usage[i])
-        {
-            m_uses[i] = new Cell();
-        }
-    }
-}
 
 CellPtr Grid::connectLinks(const std::vector< std::vector< int > >& usage, const std::vector< std::string >& columns)
 {
