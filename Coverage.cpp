@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <climits>
 
+using namespace std;
 
 class Cell;
 typedef Cell* CellPtr;
@@ -25,77 +26,6 @@ public:
 	unsigned int index;
 
 };
-
-void DancingLinks::connectLinks(
-    const std::vector< std::vector< int > >& usage, 
-    const std::vector< std::string >& columns)
-{
-    auto root = new Cell();
-	root->left = root;
-	root->right = root;
-
-	auto colCount = columns.size();
-	auto rowCount = usage.size();
-
-	// connect the column head links
-	for (unsigned int col = 0; col < colCount; ++col)
-	{
-        auto column = new Cell();
-		// column->name = columns[col];
-		column->index = col;
-		column->col = column;
-
-		column->up = column;
-
-        column->right = root;
-        column->left = root->left;
-		column->right->left = column;
-		column->left->right = column;
-
-	}
-
-	// for each row ...
-	for (unsigned int row = 0; row < rowCount; ++row)
-	{
-	    auto column = root->right;
-		Cell* firstInRow = NULL;
-		auto usageRow = usage[row];
-		assert(colCount == usageRow.size());
-		// link up a Cell for each row entry that is used.
-		for (unsigned int col = 0; col < colCount; ++col)
-		{
-			assert(column != root);
-			if (usageRow[col])
-			{
-				auto e = new Cell();
-				e->col = column;
-				++(column->useCount);
-				if (!firstInRow)
-				{
-					firstInRow = e;
-					e->left = e;
-					e->right = e;
-				} else
-				{
-
-                    e->right = firstInRow;
-                    e->left = firstInRow->left;
-                    e->right->left = e;
-                    e->left->right = e;
-
-				}
-				e->down = column;
-				e->up = column->up;
-				e->down->up = e;
-				e->up->down = e;
-			}
-			column=column->right;
-		}
-		assert (column == root);
-	}
-
-	m_root = root;
-}
 
 static void linkCol(Cell* c)
 {
@@ -152,15 +82,16 @@ bool DancingLinks::solved() const
 }
 
 
-void DancingLinks::showSolution( )
+static void showSolution(const std::vector<Cell* >* solution,
+							unsigned int pieceCount, 
+							unsigned int rowCount, 
+							unsigned int colCount)
 {
 
 	std::vector<unsigned int> display;
-	display.resize(m_rowCount * m_colCount, INT_MAX);
+	display.resize(rowCount * colCount, INT_MAX);
 
-	// BOOST_ASSERT(m_solution.size() == m_pieceCount);
-
-	for (auto r : m_solution)
+	for (auto r : *solution)
 	{
         unsigned int piece = -1;
 		auto row_it = r;
@@ -168,7 +99,7 @@ void DancingLinks::showSolution( )
 		{
 			unsigned int index = row_it->col->index;
 
-			if (index < m_pieceCount)
+			if (index < pieceCount)
 			{
 				piece = index;
 			}
@@ -179,22 +110,22 @@ void DancingLinks::showSolution( )
 		{
 			unsigned int index = row_it->col->index;
 
-			if (index < m_pieceCount)
+			if (index < pieceCount)
 			{
                 break;
 			} else
 			{
-				display[index-m_pieceCount] = piece;
+				display[index-pieceCount] = piece;
 			}
 			row_it = row_it->right;
 		}
 	}
 
-	for (unsigned int row = 0; row < m_colCount; ++row)
+	for (unsigned int row = 0; row < colCount; ++row)
 	{
-		for (unsigned int col = 0; col < m_rowCount; ++col)
+		for (unsigned int col = 0; col < rowCount; ++col)
 		{
-			unsigned int displayIndex = row * m_rowCount + col;
+			unsigned int displayIndex = row * rowCount + col;
 			unsigned int displayPiece = display[displayIndex];
 			BOOST_ASSERT(displayPiece != INT_MAX);
 			std::cout << std::setw(3) << displayPiece;
@@ -263,13 +194,14 @@ bool DancingLinks::backup()
     return false;
 }
 
-bool DancingLinks::getSolution( )
+    
+const std::vector<Cell* >* DancingLinks::getSolution() 
 {
 	if (solved())
 	{
 		if (!backup())
 		{
-			return false;
+			return NULL;
 		}
 	}
 
@@ -279,62 +211,100 @@ bool DancingLinks::getSolution( )
 
 		if (solved())
 		{
-			return true;
+			return &m_solution;
 		}
 
 		if (!backup())
 		{
-			return false;
+			return NULL;
 		}
 	}
-    return true;
+    return NULL; // should never get here
 }
 
-void DancingLinks::solve()
+void DancingLinks::solve(
+	unsigned int pieceCount, 
+    unsigned int rowCount, 
+    unsigned int colCount
+	)
 {
-	while(getSolution())
+	const vector <Cell* > * solution;
+	while(solution = getSolution())
 	{
-		showSolution();
+		showSolution(solution,
+						pieceCount, 
+						rowCount, 
+						colCount);
 	}
-}
-
-void DancingLinks::search( )
-{
-    auto smallest = smallestCol();
-
-    if (!smallest)
-    {
-        showSolution();
-        return;
-    }
-
-    unlinkCol(smallest);
-
-    for (auto row = smallest->down; row != smallest; row = row->down)
-    {
-        m_solution.push_back(row);
-        for (auto row_it = row->right; row_it != row; row_it = row_it->right)
-        {
-            unlinkCol(row_it->col);
-        }
-        search();
-        for (auto row_it = row->left; row_it != row; row_it = row_it->left)
-        {
-            linkCol(row_it->col);
-        }
-		m_solution.pop_back();
-    }
-
-    linkCol(smallest);
 }
 
 DancingLinks::DancingLinks(
-    unsigned int pieceCount, 
-    unsigned int xSize, 
-    unsigned int ySize,
     const std::vector< std::vector< int > >& usage,
     const std::vector< std::string >& columns)
-      : m_pieceCount(pieceCount), m_rowCount(xSize), m_colCount(ySize)
 {
-	connectLinks(usage, columns);
+	auto root = new Cell();
+	root->left = root;
+	root->right = root;
+
+	auto colCount = columns.size();
+	auto rowCount = usage.size();
+
+	// connect the column head links
+	for (unsigned int col = 0; col < colCount; ++col)
+	{
+        auto column = new Cell();
+		// column->name = columns[col];
+		column->index = col;
+		column->col = column;
+
+		column->up = column;
+
+        column->right = root;
+        column->left = root->left;
+		column->right->left = column;
+		column->left->right = column;
+
+	}
+
+	// for each row ...
+	for (unsigned int row = 0; row < rowCount; ++row)
+	{
+	    auto column = root->right;
+		Cell* firstInRow = NULL;
+		auto usageRow = usage[row];
+		assert(colCount == usageRow.size());
+		// link up a Cell for each row entry that is used.
+		for (unsigned int col = 0; col < colCount; ++col)
+		{
+			assert(column != root);
+			if (usageRow[col])
+			{
+				auto e = new Cell();
+				e->col = column;
+				++(column->useCount);
+				if (!firstInRow)
+				{
+					firstInRow = e;
+					e->left = e;
+					e->right = e;
+				} else
+				{
+
+                    e->right = firstInRow;
+                    e->left = firstInRow->left;
+                    e->right->left = e;
+                    e->left->right = e;
+
+				}
+				e->down = column;
+				e->up = column->up;
+				e->down->up = e;
+				e->up->down = e;
+			}
+			column=column->right;
+		}
+		assert (column == root);
+	}
+
+	m_root = root;
 }

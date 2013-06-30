@@ -105,8 +105,8 @@ Puzzle::Puzzle()
     vector< vector< int > > usage;
     vector< string > columns;
     initialize(pentominos, NELEM(pentominos), 10, 6, usage, columns);
-	intrusive_ptr<DancingLinks> coverage = new DancingLinks(NELEM(pentominos), 10, 6, usage, columns);
-	coverage->solve();
+	intrusive_ptr<DancingLinks> coverage = new DancingLinks(usage, columns);
+	coverage->solve(NELEM(pentominos), 10, 6);
 }
 
 void Puzzle::display()

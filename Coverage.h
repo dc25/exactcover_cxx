@@ -12,21 +12,18 @@ class DancingLinks : public ReferenceCounted
 {
 public:
 	DancingLinks(
-        unsigned int pieceCount, 
-        unsigned int xSize, 
-        unsigned int ySize,
         const std::vector< std::vector< int > >& usage,
         const std::vector< std::string >& columns);
 
-	void search( );
-	void solve();
-    bool getSolution();
+    const std::vector<Cell* >* getSolution();
+
+	void solve(
+	unsigned int pieceCount, 
+    unsigned int rowCount, 
+    unsigned int colCount
+	);
 
 private:
-	unsigned int m_pieceCount;
-    unsigned int m_rowCount; 
-    unsigned int m_colCount;
-
     void connectLinks( 
         const std::vector< std::vector< int > >& usage, 
         const std::vector< std::string >& columns);
@@ -37,7 +34,6 @@ private:
 
 	bool solved() const;
 
-	void showSolution();
 	Cell* m_root;
 
 	std::vector<Cell* > m_solution;
