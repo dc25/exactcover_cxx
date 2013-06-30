@@ -16,13 +16,14 @@ typedef Cell* CellPtr;
 class Cell {
 public:
 	Cell()
-		: left(0), right(0), up(0), down(0), useCount(0), index(0)
+		: left(0), right(0), up(0), down(0), useCount(0), m_name(0), index(0)
 	{
 	}
 
 	CellPtr left, right, up, down, col;
 	unsigned int useCount;
 
+	char* m_name;
 	unsigned int index;
 
 };
@@ -253,7 +254,8 @@ DancingLinks::DancingLinks(
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
         auto column = new Cell();
-		// column->name = columns[col];
+		column->m_name = new char[columns[col].size() + 1];
+		strcpy(column->m_name, columns[col].c_str());
 		column->index = col;
 		column->col = column;
 
