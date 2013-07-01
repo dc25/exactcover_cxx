@@ -96,6 +96,7 @@ void Coverings::advance()
 			break;
 		}
 
+		++num_searches;
 		unlinkCol(smallest);
 
 		auto row = smallest->down;
@@ -190,6 +191,7 @@ Coverings::Coverings(
     const std::vector< std::vector< int > >& usage,
     const std::vector< std::string >& columns,
 	unsigned int secondary)
+	: num_searches(0)
 {
 	auto root = new Cell();
 	root->left = root;

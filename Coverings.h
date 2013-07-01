@@ -16,6 +16,8 @@ public:
 
 	const std::vector< std::vector<std::string> >* getSolution();
 
+	unsigned int num_searches;
+
 private:
     void connectLinks( 
         const std::vector< std::vector< int > >& usage, 
