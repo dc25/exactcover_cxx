@@ -188,7 +188,8 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
 
 Coverings::Coverings(
     const std::vector< std::vector< int > >& usage,
-    const std::vector< std::string >& columns)
+    const std::vector< std::string >& columns,
+	unsigned int secondary)
 {
 	auto root = new Cell();
 	root->left = root;
@@ -251,6 +252,14 @@ Coverings::Coverings(
 			column=column->right;
 		}
 		assert (column == root);
+	}
+
+	for (unsigned int s = 0; s < secondary; ++s)
+	{
+		auto column = root->left;
+		root->left = column->left;
+		root->left->right = root;
+		column->left = column->right = column;
 	}
 
 	m_root = root;
