@@ -21,7 +21,7 @@
     <ClCompile Include="pentominos.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Coverage.cpp">
+    <ClCompile Include="Coverings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClInclude Include="pentominos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Coverage.h">
+    <ClInclude Include="Coverings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

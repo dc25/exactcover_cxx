@@ -8,7 +8,7 @@
 #include "utilities/ARRAYSIZE.h"
 #include "BoolPic.h"
 #include "pentominos.h"
-#include "Coverage.h"
+#include "Coverings.h"
 
 using namespace std;
 using namespace boost;

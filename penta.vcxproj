@@ -64,13 +64,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Coverage.cpp" />
+    <ClCompile Include="Coverings.cpp" />
     <ClCompile Include="penta.cpp" />
     <ClCompile Include="pentominos.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoolPic.h" />
-    <ClInclude Include="Coverage.h" />
+    <ClInclude Include="Coverings.h" />
     <ClInclude Include="pentominos.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
