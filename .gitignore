@@ -3,6 +3,7 @@
 *.sdf
 *.opensdf
 *.v11.suo
+*.vcxproj.user
 *.out
 Debug/
 Release/
