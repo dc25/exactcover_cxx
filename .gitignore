@@ -1,0 +1,8 @@
+*~
+*.swp
+*.sdf
+*.opensdf
+*.v11.suo
+*.out
+Debug/
+Release/
