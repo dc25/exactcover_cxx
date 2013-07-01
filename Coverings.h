@@ -1,12 +1,12 @@
-#ifndef coverage_h__
-#define coverage_h__
+#ifndef coverings_h__
+#define coverings_h__
 
-#include "utilities/ReferenceCounted.h"
 #include <vector>
+#include <memory>
 
 class Cell;
 
-class Coverings : public ReferenceCounted
+class Coverings 
 {
 public:
 	Coverings(

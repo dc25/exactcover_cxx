@@ -1,17 +1,15 @@
-#include "utilities/ReferenceCounted.h"
-#include "boost/intrusive_ptr.hpp"
 #include <vector>
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <memory>
 #include "utilities/ARRAYSIZE.h"
 #include "BoolPic.h"
 #include "pentominos.h"
 #include "Coverings.h"
 
 using namespace std;
-using namespace boost;
 
 class Piece;
 class PieceSet;
@@ -179,7 +177,7 @@ Puzzle::Puzzle()
     vector< vector< int > > usage;
     vector< string > columns;
     initialize(pentominos, NELEM(pentominos), 6, 10, usage, columns);
-	intrusive_ptr<Coverings> coverage = new Coverings(usage, columns);
+	unique_ptr<Coverings> coverage(new Coverings(usage, columns));
 	while(auto solution = coverage->getSolution())
 	{
 		showSolution(solution);

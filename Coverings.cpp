@@ -150,7 +150,6 @@ void Coverings::makeNameSolution()
         }
         sort(temp.begin(), temp.end());
 
-		unsigned int nameIndex = 0;
 		for (auto name : temp)
 		{
 			m_nameSolution[solutionIndex].push_back(string(name));
