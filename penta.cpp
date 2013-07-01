@@ -179,7 +179,7 @@ Puzzle::Puzzle()
     vector< vector< int > > usage;
     vector< string > columns;
     initialize(pentominos, NELEM(pentominos), 6, 10, usage, columns);
-	intrusive_ptr<DancingLinks> coverage = new DancingLinks(usage, columns);
+	intrusive_ptr<Coverings> coverage = new Coverings(usage, columns);
 	while(auto solution = coverage->getSolution())
 	{
 		showSolution(solution);

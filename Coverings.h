@@ -6,10 +6,10 @@
 
 class Cell;
 
-class DancingLinks : public ReferenceCounted
+class Coverings : public ReferenceCounted
 {
 public:
-	DancingLinks(
+	Coverings(
         const std::vector< std::vector< int > >& usage,
         const std::vector< std::string >& columns);
 

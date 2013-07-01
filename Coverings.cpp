@@ -72,7 +72,7 @@ static void linkRow(Cell* row)
     }
 }
 
-Cell* DancingLinks::smallestCol( ) const
+Cell* Coverings::smallestCol( ) const
 {
 	auto minUse = UINT_MAX;
     Cell* smallest = NULL;
@@ -87,7 +87,7 @@ Cell* DancingLinks::smallestCol( ) const
     return smallest;
 }
 
-void DancingLinks::advance()
+void Coverings::advance()
 {
     for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
 	{
@@ -104,7 +104,7 @@ void DancingLinks::advance()
 	}
 }
 
-bool DancingLinks::backup()
+bool Coverings::backup()
 {
 	while (m_solution.size())
 	{
@@ -131,7 +131,7 @@ bool DancingLinks::backup()
     return false;
 }
 
-void DancingLinks::makeNameSolution()
+void Coverings::makeNameSolution()
 {
 	m_nameSolution.resize(0);
 	m_nameSolution.resize(m_solution.size());
@@ -159,7 +159,7 @@ void DancingLinks::makeNameSolution()
     }
 }
     
-const std::vector< std::vector<string> >* DancingLinks::getSolution() 
+const std::vector< std::vector<string> >* Coverings::getSolution() 
 {
     if (m_root == m_root->right)
 	{
@@ -187,7 +187,7 @@ const std::vector< std::vector<string> >* DancingLinks::getSolution()
     return NULL; // should never get here
 }
 
-DancingLinks::DancingLinks(
+Coverings::Coverings(
     const std::vector< std::vector< int > >& usage,
     const std::vector< std::string >& columns)
 {
