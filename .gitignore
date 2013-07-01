@@ -6,3 +6,6 @@
 *.out
 Debug/
 Release/
+exactcover.py
+exactcover_wrap.cxx
+
