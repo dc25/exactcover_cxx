@@ -7,7 +7,6 @@
 #include <sstream>
 #include "utilities/ARRAYSIZE.h"
 #include "BoolPic.h"
-#include "Piece.h"
 #include "pentominos.h"
 #include "Coverage.h"
 
@@ -30,12 +29,26 @@ class Puzzle
                  vector< vector < int > >& usage,
                  vector< string >& columns);
 
-        void display();
-    private:
-        intrusive_ptr<Piece> m_puzzleUnits[10][6];
-		intrusive_ptr<PieceSet> m_pieces;
 
 };
+
+bool isUsed(const BoolPic a)
+{
+    size_t numRow = MAXSPAN;
+    size_t numCol = MAXSPAN;
+
+	for (size_t row = 0; row < numRow; ++row)
+    {
+        for (size_t col = 0; col < numCol; ++col)
+        {
+            if (a[row][col])
+			{
+				return true;
+			}
+        }
+    }
+	return false;
+}
 
 void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage, vector< string >& columns)
 {
@@ -160,10 +173,9 @@ static void showSolution(const std::vector< std::vector < string > >* solution)
 	}
     std::cout << std::endl;
 }
+
 Puzzle::Puzzle()
 {
-    m_pieces = new PieceSet(pentominos, NELEM(pentominos));
-
     vector< vector< int > > usage;
     vector< string > columns;
     initialize(pentominos, NELEM(pentominos), 6, 10, usage, columns);
@@ -174,31 +186,6 @@ Puzzle::Puzzle()
 	}
 }
 
-void Puzzle::display()
-{
-    static size_t numPuzzleRow = NELEM(m_puzzleUnits);
-    static size_t numPuzzleCol = NELEM(m_puzzleUnits[0]);
-
-    // find the first empty row/col on the board.
-    for (size_t row = 0; row < numPuzzleRow; ++row)
-    {
-        for (size_t col = 0; col < numPuzzleCol; ++col)
-        {
-            string symbol;
-            if (m_puzzleUnits[row][col] == NULL)
-            {
-                symbol = "* ";
-            } else
-            {
-                symbol = m_puzzleUnits[row][col]->m_id;
-            }
-            cout << symbol;
-            cout << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-}
 
 int main ()
 {

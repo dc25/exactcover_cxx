@@ -1,5 +1,4 @@
 #include "pentominos.h"
-#include "utilities/ARRAYSIZE.h"
 
 using namespace std;
 

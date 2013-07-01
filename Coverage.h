@@ -2,9 +2,7 @@
 #define coverage_h__
 
 #include "utilities/ReferenceCounted.h"
-#include "BoolPic.h"
 #include <vector>
-#include "boost/intrusive_ptr.hpp"
 
 class Cell;
 
@@ -22,16 +20,13 @@ private:
         const std::vector< std::vector< int > >& usage, 
         const std::vector< std::string >& columns);
 
-    Cell* smallestCol();
+    Cell* smallestCol() const;
 	void advance();
 	bool backup();
-
-	bool solved() const;
 
     void makeNameSolution();
 
 	Cell* m_root;
-
 	std::vector<Cell* > m_solution;
 	std::vector < std::vector<std::string> > m_nameSolution;
 };

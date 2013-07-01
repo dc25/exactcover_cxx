@@ -1,15 +1,9 @@
 #include "Coverage.h"
-#include "BoolPic.h"
-#include "utilities/ARRAYSIZE.h"
-#include "utilities/ReferenceCounted.h"
-#include "boost/intrusive_ptr.hpp"
 #include <vector>
-#include <iostream>
-#include <iomanip>
 #include <climits>
 #include <algorithm>
 #include <string>
-#include <sstream>
+#include <assert.h>
 
 using namespace std;
 
@@ -78,12 +72,7 @@ static void linkRow(Cell* row)
     }
 }
 
-bool DancingLinks::solved() const
-{
-    return (m_root == m_root->right);
-}
-
-Cell* DancingLinks::smallestCol( )
+Cell* DancingLinks::smallestCol( ) const
 {
 	auto minUse = UINT_MAX;
     Cell* smallest = NULL;
@@ -172,7 +161,7 @@ void DancingLinks::makeNameSolution()
     
 const std::vector< std::vector<string> >* DancingLinks::getSolution() 
 {
-	if (solved())
+    if (m_root == m_root->right)
 	{
 		if (!backup())
 		{
@@ -184,7 +173,7 @@ const std::vector< std::vector<string> >* DancingLinks::getSolution()
 	{
 		advance();
 
-		if (solved())
+        if (m_root == m_root->right)
 		{
 			makeNameSolution();
 			return &m_nameSolution;
