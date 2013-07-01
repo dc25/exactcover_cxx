@@ -32,8 +32,5 @@
     <ClInclude Include="pentominos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Coverings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
