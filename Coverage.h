@@ -15,13 +15,7 @@ public:
         const std::vector< std::vector< int > >& usage,
         const std::vector< std::string >& columns);
 
-    const std::vector<Cell* >* getSolution();
-
-	void solve(
-	unsigned int pieceCount, 
-    unsigned int rowCount, 
-    unsigned int colCount
-	);
+    const std::vector< std::vector<std::string> >* getSolution();
 
 private:
     void connectLinks( 
@@ -34,9 +28,12 @@ private:
 
 	bool solved() const;
 
+    void makeNameSolution();
+
 	Cell* m_root;
 
 	std::vector<Cell* > m_solution;
+	std::vector < std::vector<std::string> > m_nameSolution;
 };
 
 

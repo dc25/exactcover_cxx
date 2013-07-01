@@ -392,8 +392,8 @@ const Pentomino pentominos[] = {
     Pentomino("S", S_pics ),
     Pentomino("V", V_pics ),
     Pentomino("T", T_pics ),
-    Pentomino("L", F_pics ),
-    Pentomino("F", W_pics ),
+    Pentomino("F", F_pics ),
+    Pentomino("W", W_pics ),
     Pentomino("Z", Z_pics ),
     Pentomino("X", X_pics ),
     Pentomino("I", I_pics )

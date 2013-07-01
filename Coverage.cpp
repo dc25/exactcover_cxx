@@ -7,6 +7,9 @@
 #include <iostream>
 #include <iomanip>
 #include <climits>
+#include <algorithm>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -16,7 +19,7 @@ typedef Cell* CellPtr;
 class Cell {
 public:
 	Cell()
-		: left(0), right(0), up(0), down(0), useCount(0), m_name(0), index(0)
+		: left(0), right(0), up(0), down(0), useCount(0), m_name(0)
 	{
 	}
 
@@ -24,8 +27,6 @@ public:
 	unsigned int useCount;
 
 	char* m_name;
-	unsigned int index;
-
 };
 
 static void linkCol(Cell* c)
@@ -80,60 +81,6 @@ static void linkRow(Cell* row)
 bool DancingLinks::solved() const
 {
     return (m_root == m_root->right);
-}
-
-
-static void showSolution(const std::vector<Cell* >* solution,
-							unsigned int pieceCount, 
-							unsigned int rowCount, 
-							unsigned int colCount)
-{
-
-	std::vector<unsigned int> display;
-	display.resize(rowCount * colCount, INT_MAX);
-
-	for (auto r : *solution)
-	{
-        unsigned int piece = -1;
-		auto row_it = r;
-		while (piece == -1)
-		{
-			unsigned int index = row_it->col->index;
-
-			if (index < pieceCount)
-			{
-				piece = index;
-			}
-			row_it = row_it->right;
-		}
-
-		while (true)
-		{
-			unsigned int index = row_it->col->index;
-
-			if (index < pieceCount)
-			{
-                break;
-			} else
-			{
-				display[index-pieceCount] = piece;
-			}
-			row_it = row_it->right;
-		}
-	}
-
-	for (unsigned int row = 0; row < colCount; ++row)
-	{
-		for (unsigned int col = 0; col < rowCount; ++col)
-		{
-			unsigned int displayIndex = row * rowCount + col;
-			unsigned int displayPiece = display[displayIndex];
-			BOOST_ASSERT(displayPiece != INT_MAX);
-			std::cout << std::setw(3) << displayPiece;
-		}
-        std::cout << std::endl;
-	}
-    std::cout << std::endl;
 }
 
 Cell* DancingLinks::smallestCol( )
@@ -195,8 +142,35 @@ bool DancingLinks::backup()
     return false;
 }
 
+void DancingLinks::makeNameSolution()
+{
+	m_nameSolution.resize(0);
+	m_nameSolution.resize(m_solution.size());
+	unsigned int solutionIndex = 0;
+    for ( auto r : m_solution )
+    {
+		std::vector<string> temp;
+        for ( auto e = r; true;)
+        {
+            temp.push_back(e->col->m_name);
+			e=e->right;
+			if (e == r)
+			{
+				break;
+			}
+        }
+        sort(temp.begin(), temp.end());
+
+		unsigned int nameIndex = 0;
+		for (auto name : temp)
+		{
+			m_nameSolution[solutionIndex].push_back(string(name));
+		}
+		solutionIndex++;
+    }
+}
     
-const std::vector<Cell* >* DancingLinks::getSolution() 
+const std::vector< std::vector<string> >* DancingLinks::getSolution() 
 {
 	if (solved())
 	{
@@ -212,7 +186,8 @@ const std::vector<Cell* >* DancingLinks::getSolution()
 
 		if (solved())
 		{
-			return &m_solution;
+			makeNameSolution();
+			return &m_nameSolution;
 		}
 
 		if (!backup())
@@ -221,22 +196,6 @@ const std::vector<Cell* >* DancingLinks::getSolution()
 		}
 	}
     return NULL; // should never get here
-}
-
-void DancingLinks::solve(
-	unsigned int pieceCount, 
-    unsigned int rowCount, 
-    unsigned int colCount
-	)
-{
-	const vector <Cell* > * solution;
-	while(solution = getSolution())
-	{
-		showSolution(solution,
-						pieceCount, 
-						rowCount, 
-						colCount);
-	}
 }
 
 DancingLinks::DancingLinks(
@@ -256,9 +215,7 @@ DancingLinks::DancingLinks(
         auto column = new Cell();
 		column->m_name = new char[columns[col].size() + 1];
 		strcpy(column->m_name, columns[col].c_str());
-		column->index = col;
 		column->col = column;
-
 		column->up = column;
 
         column->right = root;

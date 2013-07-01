@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include "utilities/ARRAYSIZE.h"
 #include "BoolPic.h"
@@ -81,7 +82,7 @@ void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned i
                                         skipRow = true;
                                     } else
                                     {
-                                        rowUsage[pieceCount + (col * rowCount) + row] = true;
+                                        rowUsage[pieceCount + (row * colCount) + col] = true;
                                     }
 
                                 }
@@ -98,15 +99,79 @@ void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned i
     }
 }
 
+static void showSolution(const std::vector< std::vector < string > >* solution)
+{
+
+	unsigned int maxRow = 0;
+	unsigned int maxCol = 0;
+    for ( auto r : *solution)
+    {
+        for (unsigned int cellIndex = 0; cellIndex < r.size() -1; ++cellIndex)
+        {
+
+            stringstream ss;
+            ss << r[cellIndex].c_str();
+            
+            unsigned int row,col;
+            char comma;
+            ss >> row >> comma >> col;
+            if (row > maxRow)
+            {
+                maxRow = row;
+            }
+            if (col > maxCol)
+            {
+                maxCol = col;
+            }
+        }
+    }
+
+    unsigned int rowCount = maxRow+1;
+    unsigned int colCount = maxCol+1;
+
+	std::vector<string> display;
+	display.resize(rowCount * colCount);
+
+    for ( auto r : *solution)
+    {
+        auto name = r.back();
+        for (unsigned int cellIndex = 0; cellIndex < r.size() -1; ++cellIndex)
+        {
+
+            stringstream ss;
+            ss << r[cellIndex].c_str();
+            
+            unsigned int row,col;
+            char comma;
+            ss >> row >> comma >> col;
+            auto displayIndex = row*colCount + col;
+            display[displayIndex] = name;
+        }
+    }
+
+	for (unsigned int row = 0; row < rowCount; ++row)
+	{
+		for (unsigned int col = 0; col < colCount; ++col)
+		{
+			unsigned int displayIndex = row * colCount + col;
+			std::cout << std::setw(3) << display[displayIndex];
+		}
+        std::cout << std::endl;
+	}
+    std::cout << std::endl;
+}
 Puzzle::Puzzle()
 {
     m_pieces = new PieceSet(pentominos, NELEM(pentominos));
 
     vector< vector< int > > usage;
     vector< string > columns;
-    initialize(pentominos, NELEM(pentominos), 10, 6, usage, columns);
+    initialize(pentominos, NELEM(pentominos), 6, 10, usage, columns);
 	intrusive_ptr<DancingLinks> coverage = new DancingLinks(usage, columns);
-	coverage->solve(NELEM(pentominos), 10, 6);
+	while(auto solution = coverage->getSolution())
+	{
+		showSolution(solution);
+	}
 }
 
 void Puzzle::display()
