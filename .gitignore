@@ -2,7 +2,7 @@
 *.swp
 *.sdf
 *.opensdf
-*.v11.suo
+*.suo
 *.vcxproj.user
 *.out
 *.exp
