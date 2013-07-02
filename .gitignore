@@ -5,6 +5,11 @@
 *.v11.suo
 *.vcxproj.user
 *.out
+*.exp
+*.lib
+*.pdb
+*.pyd
+*.pyc
 Debug/
 Release/
 exactcover.py
