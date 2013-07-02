@@ -17,6 +17,11 @@ public:
 	{
 	}
 
+	~Cell()
+	{
+        delete[] m_name;
+	}
+
 	CellPtr left, right, up, down, col;
 	unsigned int useCount;
 
@@ -265,4 +270,21 @@ Coverings::Coverings(
 	}
 
 	m_root = root;
+}
+
+Coverings::~Coverings()
+{
+    for (auto col = m_root->right; col != m_root; )
+    {
+        for (auto e = col->down; e != col; )
+        {
+            auto e_next = e->down;
+            delete e;
+            e = e_next;
+        }
+        auto col_next = col->right;
+        delete col;
+        col = col_next;
+    }
+    delete m_root;
 }

@@ -14,6 +14,8 @@ public:
         const std::vector< std::string >& columns,
 		unsigned int secondary=0);
 
+    ~Coverings();
+
 	const std::vector< std::vector<std::string> >* getSolution();
 
 	unsigned int num_searches;
