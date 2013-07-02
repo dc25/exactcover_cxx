@@ -154,19 +154,17 @@ def solution_str(solution):
 def main():
     m = matrix()
     c = columns(m)
-    print c
 
     print "Example covering:"
     # Take the first result from the iterator.
     solver = exactcover.Coverings(m, c)
 
-    while (True):
-        solution = solver.getSolution()
-        if solution is None:
-            break
-        print
-        print solution_str(solution)
-        print 
+    solution = solver.getSolution()
+    if solution is None:
+        return
+    print
+    print solution_str(solution)
+    print 
 
     # Count the number of results returned by the iterator.
     # print "There are {0} unique tilings.".format(
