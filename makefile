@@ -17,13 +17,16 @@ DEFINE_FLAGS=$(foreach s, $(DEFINES), -D$(s))
 INCLUDE_FLAGS=$(foreach s, $(INCLUDE_DIRS), -I$(s))
 CXXFLAGS=-g  $(INCLUDE_FLAGS) $(DEFINE_FLAGS) $(COMPILER_OPTIONS)
 
-objs: $(OBJS)
+objs: run_swig $(OBJS)
 lib : $(LIB)
 
-$(LIB) : $(OBJS)
+$(LIB) : objs
 	$(CXX) $(LDFLAGS) $(LIB) $(OBJS) $(LLDLIBS) 
 
 %.o : %.cxx
 	g++ -c $(CXXFLAGS) $< -o $@
+
+run_swig : 
+	swig -c++ -python exactcover.i
 
 
