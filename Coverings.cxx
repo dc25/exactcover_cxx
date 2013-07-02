@@ -118,7 +118,7 @@ bool Coverings::backup()
 		auto row = m_solution.back();
 		m_solution.pop_back();
 
-		// we are done using this row in this column so put back the columns cooresponding to it.
+		// We are done using this row in this column so restore its columns.
         linkRow(row);
 
 		row = row->m_down;
