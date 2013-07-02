@@ -76,7 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Coverings.cpp" />
+    <ClCompile Include="Coverings.cxx" />
     <ClCompile Include="exactcover_wrap.cxx" />
   </ItemGroup>
   <ItemGroup>

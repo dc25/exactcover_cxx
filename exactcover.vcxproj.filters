@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Coverings.cpp">
+    <ClCompile Include="exactcover_wrap.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exactcover_wrap.cxx">
+    <ClCompile Include="Coverings.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
