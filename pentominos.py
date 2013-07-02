@@ -121,8 +121,16 @@ def matrix():
     for name, shape in pentominos.iteritems():
         for rotation in rotations(shape):
             for position in positions(rotation, 8, 8, b):
-                covers.append([name] + sorted(position))
+                covers.append([name] + [str(square[0]) + ',' + str(square[1]) for square in position])
     return covers
+
+def columns(usage):
+    names = []
+    for row in usage:
+        names = list(set(names + row))
+    return sorted(names)
+
+        
 
 
 def solution_str(solution):
@@ -135,8 +143,9 @@ def solution_str(solution):
 
     # Mark each pentomino by its name.
     for row in solution:
-        c = row[0]
-        for x, y in row[1:]:
+        c = row[-1]
+        for coords in row[:-1]:
+            x, y = [int(d.strip()) for d in coords.split(',')]
             grid[y][x] = c
 
     return "\n".join(''.join(row) for row in grid)
@@ -144,18 +153,24 @@ def solution_str(solution):
 
 def main():
     m = matrix()
+    c = columns(m)
+    print c
 
     print "Example covering:"
     # Take the first result from the iterator.
-    solution = exactcover.Coverings(m).next()
-    pprint.pprint(solution)
-    print
-    print solution_str(solution)
-    print
+    solver = exactcover.Coverings(m, c)
+
+    while (True):
+        solution = solver.getSolution()
+        if solution is None:
+            break
+        print
+        print solution_str(solution)
+        print 
 
     # Count the number of results returned by the iterator.
-    print "There are {0} unique tilings.".format(
-        sum(1 for x in exactcover.Coverings(m)))
+    # print "There are {0} unique tilings.".format(
+    #     sum(1 for x in exactcover.Coverings(m)))
 
 
 if __name__ == '__main__':
