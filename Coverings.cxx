@@ -1,4 +1,5 @@
 #include "Coverings.h"
+#include <string.h>
 #include <vector>
 #include <map>
 #include <climits>

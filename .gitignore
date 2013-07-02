@@ -10,8 +10,9 @@
 *.pdb
 *.pyd
 *.pyc
+*.o
+*.so
 Debug/
 Release/
 exactcover.py
 exactcover_wrap.cxx
-
