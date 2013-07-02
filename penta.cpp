@@ -24,7 +24,7 @@ class Puzzle
                  unsigned int pieceCount, 
                  unsigned int rowCount, 
                  unsigned int colCount, 
-                 vector< vector < int > >& usage,
+                 vector< vector < string > >& usage,
                  vector< string >& columns);
 
 
@@ -48,7 +48,7 @@ bool isUsed(const BoolPic a)
 	return false;
 }
 
-void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < int > >& usage, vector< string >& columns)
+void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned int rowCount, unsigned int colCount, vector< vector < string > >& usage, vector< string >& columns)
 {
     for (size_t p = 0; p < pieceCount; ++p)
     {
@@ -74,9 +74,8 @@ void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned i
 				{
 					for (unsigned int colVal = 0; colVal < colCount; ++colVal)
 					{
-                        std::vector<int> rowUsage;
-                        rowUsage.resize(pieceCount + rowCount * colCount); // 
-                        rowUsage[p] = true;
+						std::vector<string> rowUsage;
+						rowUsage.push_back(columns[p]);
 
                         auto skipRow = false;  // set to true if this piece goes out of bounds
                         for (int i = 0; i<NELEM(piecePic) && !skipRow; ++i)
@@ -93,9 +92,9 @@ void Puzzle::initialize(const Pentomino a[], unsigned int pieceCount, unsigned i
                                         skipRow = true;
                                     } else
                                     {
-                                        rowUsage[pieceCount + (row * colCount) + col] = true;
+										auto columnIndex = pieceCount + (row * colCount) + col;
+										rowUsage.push_back(columns[columnIndex]);
                                     }
-
                                 }
                             }
                         }
@@ -174,7 +173,7 @@ static void showSolution(const std::vector< std::vector < string > >* solution)
 
 Puzzle::Puzzle()
 {
-    vector< vector< int > > usage;
+    vector< vector< string > > usage;
     vector< string > columns;
     initialize(pentominos, NELEM(pentominos), 6, 10, usage, columns);
 	unique_ptr<Coverings> coverage(new Coverings(usage, columns));

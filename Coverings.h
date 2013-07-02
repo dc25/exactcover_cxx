@@ -10,7 +10,7 @@ class Coverings
 {
 public:
 	Coverings(
-        const std::vector< std::vector< int > >& usage,
+        const std::vector< std::vector< std::string > >& usage,
         const std::vector< std::string >& columns,
 		unsigned int secondary=0);
 

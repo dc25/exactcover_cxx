@@ -1,5 +1,6 @@
 #include "Coverings.h"
 #include <vector>
+#include <map>
 #include <climits>
 #include <algorithm>
 #include <string>
@@ -193,7 +194,7 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
 }
 
 Coverings::Coverings(
-    const std::vector< std::vector< int > >& usage,
+    const std::vector< std::vector< std::string > >& usage,
     const std::vector< std::string >& columns,
 	unsigned int secondary)
 	: num_searches(0)
@@ -205,14 +206,18 @@ Coverings::Coverings(
 	auto colCount = columns.size();
 	auto rowCount = usage.size();
 
+    std::map<std::string, Cell*> columnMap;
+
 	// connect the column head links
 	for (unsigned int col = 0; col < colCount; ++col)
 	{
         auto column = new Cell();
 		column->m_name = new char[columns[col].size() + 1];
 		strcpy(column->m_name, columns[col].c_str());
+        columnMap[columns[col]] = column;
 		column->col = column;
 		column->up = column;
+		column->down = column;
 
         column->right = root;
         column->left = root->left;
@@ -224,41 +229,35 @@ Coverings::Coverings(
 	// for each row ...
 	for (unsigned int row = 0; row < rowCount; ++row)
 	{
-	    auto column = root->right;
 		Cell* firstInRow = NULL;
 		auto usageRow = usage[row];
-		assert(colCount == usageRow.size());
 		// link up a Cell for each row entry that is used.
-		for (unsigned int col = 0; col < colCount; ++col)
+		for (unsigned int eIndex = 0; eIndex < usageRow.size(); ++eIndex)
 		{
-			assert(column != root);
-			if (usageRow[col])
-			{
-				auto e = new Cell();
-				e->col = column;
-				++(column->useCount);
-				if (!firstInRow)
-				{
-					firstInRow = e;
-					e->left = e;
-					e->right = e;
-				} else
-				{
+            auto column = columnMap[usageRow[eIndex]];
+            auto e = new Cell();
+            e->col = column;
+            e->down = column;
+            e->up = column->up;
+            e->down->up = e;
+            e->up->down = e;
 
-                    e->right = firstInRow;
-                    e->left = firstInRow->left;
-                    e->right->left = e;
-                    e->left->right = e;
+            ++(column->useCount);
+            if (!firstInRow)
+            {
+                firstInRow = e;
+                e->left = e;
+                e->right = e;
+            } else
+            {
 
-				}
-				e->down = column;
-				e->up = column->up;
-				e->down->up = e;
-				e->up->down = e;
-			}
-			column=column->right;
+                e->right = firstInRow;
+                e->left = firstInRow->left;
+                e->right->left = e;
+                e->left->right = e;
+
+            }
 		}
-		assert (column == root);
 	}
 
 	for (unsigned int s = 0; s < secondary; ++s)
