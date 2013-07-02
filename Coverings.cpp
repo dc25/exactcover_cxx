@@ -14,7 +14,7 @@ typedef Cell* CellPtr;
 class Cell {
 public:
 	Cell()
-		: left(0), right(0), up(0), down(0), useCount(0), m_name(0)
+		: m_left(0), m_right(0), m_up(0), m_down(0), m_useCount(0), m_name(0)
 	{
 	}
 
@@ -23,39 +23,39 @@ public:
         delete[] m_name;
 	}
 
-	CellPtr left, right, up, down, col;
-	unsigned int useCount;
+	CellPtr m_left, m_right, m_up, m_down, col;
+	unsigned int m_useCount;
 
 	char* m_name;
 };
 
 static void linkCol(Cell* c)
 {
-    for (auto r = c->up; r != c; r = r->up)
+    for (auto r = c->m_up; r != c; r = r->m_up)
 	{
-        for (auto row_it = r->left; row_it != r; row_it = row_it->left)
+        for (auto row_it = r->m_left; row_it != r; row_it = row_it->m_left)
         {
-			row_it->col->useCount++;
-			row_it->up->down = row_it;
-			row_it->down->up = row_it;
+			row_it->col->m_useCount++;
+			row_it->m_up->m_down = row_it;
+			row_it->m_down->m_up = row_it;
         }
 
 	}
-	c->left->right = c;
-	c->right->left = c;
+	c->m_left->m_right = c;
+	c->m_right->m_left = c;
 }
 
 static void unlinkCol(Cell* c)
 {
-	c->right->left = c->left;
-	c->left->right = c->right;
-    for (auto r = c->down; r != c; r = r->down)
+	c->m_right->m_left = c->m_left;
+	c->m_left->m_right = c->m_right;
+    for (auto r = c->m_down; r != c; r = r->m_down)
 	{
-        for (auto row_it = r->right; row_it != r; row_it = row_it->right)
+        for (auto row_it = r->m_right; row_it != r; row_it = row_it->m_right)
         {
-			row_it->down->up = row_it->up;
-			row_it->up->down = row_it->down;
-			row_it->col->useCount--;
+			row_it->m_down->m_up = row_it->m_up;
+			row_it->m_up->m_down = row_it->m_down;
+			row_it->col->m_useCount--;
         }
 
 	}
@@ -64,7 +64,7 @@ static void unlinkCol(Cell* c)
 
 static void unlinkRow(Cell* row)
 {
-    for (auto row_it = row->right; row_it != row; row_it = row_it->right)
+    for (auto row_it = row->m_right; row_it != row; row_it = row_it->m_right)
     {
         unlinkCol(row_it->col);
     }
@@ -72,7 +72,7 @@ static void unlinkRow(Cell* row)
 
 static void linkRow(Cell* row)
 {
-    for (auto row_it = row->left; row_it != row; row_it = row_it->left)
+    for (auto row_it = row->m_left; row_it != row; row_it = row_it->m_left)
     {
         linkCol(row_it->col);
     }
@@ -82,11 +82,11 @@ Cell* Coverings::smallestCol( ) const
 {
 	auto minUse = UINT_MAX;
     Cell* smallest = NULL;
-    for (auto col = m_root->right; col != m_root; col = col->right)
+    for (auto col = m_root->m_right; col != m_root; col = col->m_right)
     {
-        if (col->useCount < minUse)
+        if (col->m_useCount < minUse)
         {
-            minUse = col->useCount;
+            minUse = col->m_useCount;
             smallest = col;
         }
     }
@@ -97,7 +97,7 @@ void Coverings::advance()
 {
     for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
 	{
-		if (smallest == smallest->down)
+		if (smallest == smallest->m_down)
 		{
 			break;
 		}
@@ -105,7 +105,7 @@ void Coverings::advance()
 		++num_searches;
 		unlinkCol(smallest);
 
-		auto row = smallest->down;
+		auto row = smallest->m_down;
 		m_solution.push_back(row);
         unlinkRow(row);
 	}
@@ -121,7 +121,7 @@ bool Coverings::backup()
 		// we are done using this row in this column so put back the columns cooresponding to it.
         linkRow(row);
 
-		row = row->down;
+		row = row->m_down;
 		if (row != row->col)
 		{
 			// if there is another row in this column then use it.
@@ -149,7 +149,7 @@ void Coverings::makeNameSolution()
         for ( auto e = r; true;)
         {
             temp.push_back(e->col->m_name);
-			e=e->right;
+			e=e->m_right;
 			if (e == r)
 			{
 				break;
@@ -167,7 +167,7 @@ void Coverings::makeNameSolution()
     
 const std::vector< std::vector<string> >* Coverings::getSolution() 
 {
-    if (m_root == m_root->right)
+    if (m_root == m_root->m_right)
 	{
 		if (!backup())
 		{
@@ -179,7 +179,7 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
 	{
 		advance();
 
-        if (m_root == m_root->right)
+        if (m_root == m_root->m_right)
 		{
 			makeNameSolution();
 			return &m_nameSolution;
@@ -200,8 +200,8 @@ Coverings::Coverings(
 	: num_searches(0)
 {
 	auto root = new Cell();
-	root->left = root;
-	root->right = root;
+	root->m_left = root;
+	root->m_right = root;
 
 	auto colCount = columns.size();
 	auto rowCount = usage.size();
@@ -216,13 +216,13 @@ Coverings::Coverings(
 		strcpy(column->m_name, columns[col].c_str());
         columnMap[columns[col]] = column;
 		column->col = column;
-		column->up = column;
-		column->down = column;
+		column->m_up = column;
+		column->m_down = column;
 
-        column->right = root;
-        column->left = root->left;
-		column->right->left = column;
-		column->left->right = column;
+        column->m_right = root;
+        column->m_left = root->m_left;
+		column->m_right->m_left = column;
+		column->m_left->m_right = column;
 
 	}
 
@@ -237,24 +237,24 @@ Coverings::Coverings(
             auto column = columnMap[usageRow[eIndex]];
             auto e = new Cell();
             e->col = column;
-            e->down = column;
-            e->up = column->up;
-            e->down->up = e;
-            e->up->down = e;
+            e->m_down = column;
+            e->m_up = column->m_up;
+            e->m_down->m_up = e;
+            e->m_up->m_down = e;
 
-            ++(column->useCount);
+            ++(column->m_useCount);
             if (!firstInRow)
             {
                 firstInRow = e;
-                e->left = e;
-                e->right = e;
+                e->m_left = e;
+                e->m_right = e;
             } else
             {
 
-                e->right = firstInRow;
-                e->left = firstInRow->left;
-                e->right->left = e;
-                e->left->right = e;
+                e->m_right = firstInRow;
+                e->m_left = firstInRow->m_left;
+                e->m_right->m_left = e;
+                e->m_left->m_right = e;
 
             }
 		}
@@ -262,10 +262,10 @@ Coverings::Coverings(
 
 	for (unsigned int s = 0; s < secondary; ++s)
 	{
-		auto column = root->left;
-		root->left = column->left;
-		root->left->right = root;
-		column->left = column->right = column;
+		auto column = root->m_left;
+		root->m_left = column->m_left;
+		root->m_left->m_right = root;
+		column->m_left = column->m_right = column;
 	}
 
 	m_root = root;
@@ -273,15 +273,15 @@ Coverings::Coverings(
 
 Coverings::~Coverings()
 {
-    for (auto col = m_root->right; col != m_root; )
+    for (auto col = m_root->m_right; col != m_root; )
     {
-        for (auto e = col->down; e != col; )
+        for (auto e = col->m_down; e != col; )
         {
-            auto e_next = e->down;
+            auto e_next = e->m_down;
             delete e;
             e = e_next;
         }
-        auto col_next = col->right;
+        auto col_next = col->m_right;
         delete col;
         col = col_next;
     }
