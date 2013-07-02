@@ -81,7 +81,7 @@ static void linkRow(Cell* row)
 Cell* Coverings::smallestCol( ) const
 {
 	auto minUse = UINT_MAX;
-    Cell* smallest = NULL;
+    Cell* smallest = nullptr;
     for (auto col = m_root->m_right; col != m_root; col = col->m_right)
     {
         if (col->m_useCount < minUse)
@@ -171,7 +171,7 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
 	{
 		if (!backup())
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -187,10 +187,10 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
 
 		if (!backup())
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
-    return NULL; // should never get here
+    return nullptr; // should never get here
 }
 
 Coverings::Coverings(
@@ -229,7 +229,7 @@ Coverings::Coverings(
 	// for each row ...
 	for (unsigned int row = 0; row < rowCount; ++row)
 	{
-		Cell* firstInRow = NULL;
+		Cell* firstInRow = nullptr;
 		auto usageRow = usage[row];
 		// link up a Cell for each row entry that is used.
 		for (unsigned int eIndex = 0; eIndex < usageRow.size(); ++eIndex)
