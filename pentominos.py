@@ -19,6 +19,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+#
+# note: This file came from 
+# https://github.com/kwaters/exactcover/blob/master/examples/pentominos.py .  
+# I found out about that project while independently developing my own version 
+# of exact cover.  I copied this file and made minor changes in it but unless 
+# otherwise noted, the rest of the files in the project were written by me.
+#
+# - Dave Compton July 5, 2013
+
 """Example pentominos solver.
 
 Dana Scott studied covering a chessboard without the four center squares with
