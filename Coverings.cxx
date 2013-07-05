@@ -2,15 +2,10 @@
 #include <string.h>
 #include <vector>
 #include <map>
-#include <climits>
 #include <algorithm>
 #include <string>
-#include <assert.h>
 
 using namespace std;
-
-class Cell;
-typedef Cell* CellPtr;
 
 class Cell {
 public:
@@ -30,7 +25,29 @@ public:
 	char* m_name;
 };
 
-static void linkCol(Cell* c)
+// Remove a column (unlink it) from its Coverings object.  
+static void unlinkCol(CellPtr c)
+{
+	// unlink from linked list of columns.
+	c->m_right->m_left = c->m_left;
+	c->m_left->m_right = c->m_right;
+    for (auto r = c->m_down; r != c; r = r->m_down)
+	{
+		// unlink every row that is in this column
+        for (auto row_it = r->m_right; row_it != r; row_it = row_it->m_right)
+        {
+			row_it->m_down->m_up = row_it->m_up;
+			row_it->m_up->m_down = row_it->m_down;
+			row_it->col->m_useCount--;
+        }
+
+	}
+
+}
+
+// Put a column (link it) back into its Coverings object.  
+// Sequence of operations is reverse of unlink.
+static void linkCol(CellPtr c)
 {
     for (auto r = c->m_up; r != c; r = r->m_up)
 	{
@@ -46,32 +63,20 @@ static void linkCol(Cell* c)
 	c->m_right->m_left = c;
 }
 
-static void unlinkCol(Cell* c)
+// Remove (unlink) a row from its Coverings object.
+static void unlinkRow(CellPtr row)
 {
-	c->m_right->m_left = c->m_left;
-	c->m_left->m_right = c->m_right;
-    for (auto r = c->m_down; r != c; r = r->m_down)
-	{
-        for (auto row_it = r->m_right; row_it != r; row_it = row_it->m_right)
-        {
-			row_it->m_down->m_up = row_it->m_up;
-			row_it->m_up->m_down = row_it->m_down;
-			row_it->col->m_useCount--;
-        }
-
-	}
-
-}
-
-static void unlinkRow(Cell* row)
-{
+	// Note that we unlink every column *except* for the one that the cell
+	// that we start with is actually in.  That column was unlinked prior
+	// to making this call.  This is as in Knuth's dancing links paper.
     for (auto row_it = row->m_right; row_it != row; row_it = row_it->m_right)
     {
         unlinkCol(row_it->col);
     }
 }
 
-static void linkRow(Cell* row)
+// Put (link) a row back into its Coverings object.
+static void linkRow(CellPtr row)
 {
     for (auto row_it = row->m_left; row_it != row; row_it = row_it->m_left)
     {
@@ -79,15 +84,13 @@ static void linkRow(Cell* row)
     }
 }
 
-Cell* Coverings::smallestCol( ) const
+CellPtr Coverings::smallestCol( ) const
 {
-	auto minUse = UINT_MAX;
-    Cell* smallest = nullptr;
+    CellPtr smallest = nullptr;
     for (auto col = m_root->m_right; col != m_root; col = col->m_right)
     {
-        if (col->m_useCount < minUse)
+        if (smallest == nullptr || smallest->m_useCount > col->m_useCount)
         {
-            minUse = col->m_useCount;
             smallest = col;
         }
     }
@@ -98,8 +101,9 @@ void Coverings::advance()
 {
     for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
 	{
-		if (smallest == smallest->m_down)
+		if (smallest->m_useCount == 0) 
 		{
+            // No way to "cover" this location so we must backtrack
 			break;
 		}
 
@@ -122,6 +126,7 @@ bool Coverings::backup()
 		// We are done using this row in this column so restore its columns.
         linkRow(row);
 
+        // Advance to the next row in this column if there is one.
 		row = row->m_down;
 		if (row != row->col)
 		{
@@ -131,7 +136,7 @@ bool Coverings::backup()
 			return true;
 		} else
 		{
-			// we are done with this column so put it back .
+			// There were no more rows in this column so put it back .
 			linkCol(row->col);
 		}
 	}
@@ -139,6 +144,7 @@ bool Coverings::backup()
     return false;
 }
 
+// Generate a vector of names from the existing vector of rows.
 void Coverings::makeNameSolution()
 {
 	m_nameSolution.resize(0);
@@ -146,6 +152,8 @@ void Coverings::makeNameSolution()
 	unsigned int solutionIndex = 0;
     for ( auto r : m_solution )
     {
+		// Sort because convention is to expect piece name
+		// to be last item in each row for the solution.
 		std::vector<string> temp;
         for ( auto e = r; true;)
         {
@@ -165,7 +173,10 @@ void Coverings::makeNameSolution()
 		solutionIndex++;
     }
 }
-    
+
+// Repeat advance/backup/advance until a solution is reached.
+// From row based solution, generate string based solution.
+// Return pointer to string based solution or nullptr if none exists.
 const std::vector< std::vector<string> >* Coverings::getSolution() 
 {
     if (m_root == m_root->m_right)
@@ -194,6 +205,13 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
     return nullptr; // should never get here
 }
 
+// Usage matrix has a row for every possible placement of every puzzle 
+// piece.  Each usage matrix row contains the name of the piece 
+// and the name of every "cell" of the puzzle that this piece occupies 
+// for this row's placement.  The columns vector has the names of all 
+// the pieces and "cells" of the puzzle.  Really, the naming convention 
+// is arbitrary but the columns should contain all of the names that 
+// are used in all of the rows.
 Coverings::Coverings(
     const std::vector< std::vector< std::string > >& usage,
     const std::vector< std::string >& columns,
@@ -207,7 +225,7 @@ Coverings::Coverings(
 	auto colCount = columns.size();
 	auto rowCount = usage.size();
 
-    std::map<std::string, Cell*> columnMap;
+    std::map<std::string, CellPtr> columnMap;
 
 	// connect the column head links
 	for (unsigned int col = 0; col < colCount; ++col)
@@ -215,7 +233,7 @@ Coverings::Coverings(
         auto column = new Cell();
 		column->m_name = new char[columns[col].size() + 1];
 		strcpy(column->m_name, columns[col].c_str());
-        columnMap[columns[col]] = column;
+        columnMap[columns[col]] = column;  // save for lookup by name.
 		column->col = column;
 		column->m_up = column;
 		column->m_down = column;
@@ -230,12 +248,12 @@ Coverings::Coverings(
 	// for each row ...
 	for (unsigned int row = 0; row < rowCount; ++row)
 	{
-		Cell* firstInRow = nullptr;
+		CellPtr firstInRow = nullptr;
 		auto usageRow = usage[row];
 		// link up a Cell for each row entry that is used.
 		for (unsigned int eIndex = 0; eIndex < usageRow.size(); ++eIndex)
 		{
-            auto column = columnMap[usageRow[eIndex]];
+            auto column = columnMap[usageRow[eIndex]]; // lookup by cell name.
             auto e = new Cell();
             e->col = column;
             e->m_down = column;
@@ -261,6 +279,7 @@ Coverings::Coverings(
 		}
 	}
 
+	// detach the "secondary" columns.
 	for (unsigned int s = 0; s < secondary; ++s)
 	{
 		auto column = root->m_left;
