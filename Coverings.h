@@ -33,16 +33,16 @@ typedef Cell* CellPtr;
 class Coverings 
 {
 public:
-	Coverings(
+    Coverings(
         const std::vector< std::vector< std::string > >& usage,
         const std::vector< std::string >& columns,
-		unsigned int secondary=0);
+        unsigned int secondary=0);
 
     ~Coverings();
 
-	const std::vector< std::vector<std::string> >* getSolution();
+    const std::vector< std::vector<std::string> >* getSolution();
 
-	unsigned int num_searches;
+    unsigned int num_searches;
 
 private:
     void connectLinks( 
@@ -50,14 +50,14 @@ private:
         const std::vector< std::string >& columns);
 
     Cell* smallestCol() const;
-	void advance();
-	bool backup();
+    void advance();
+    bool backup();
 
     void makeNameSolution();
 
-	Cell* m_root;
-	std::vector<Cell* > m_solution;
-	std::vector < std::vector<std::string> > m_nameSolution;
+    Cell* m_root;
+    std::vector<Cell* > m_solution;
+    std::vector < std::vector<std::string> > m_nameSolution;
 };
 
 
