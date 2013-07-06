@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-/* exactcover.i */
-%module exactcover
+/* exactcover_cxx.i */
+%module exactcover_cxx
 %{
 #include "Coverings.h"
 %}

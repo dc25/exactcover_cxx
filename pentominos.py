@@ -46,7 +46,7 @@ There are 520 tilings (65 if we eliminate reflections and rotations).
 """
 import pprint
 
-import exactcover
+import exactcover_cxx
 
 # The twelve pentominos, along with their names.
 pentominos = {
