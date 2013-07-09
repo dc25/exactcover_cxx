@@ -28,7 +28,6 @@ THE SOFTWARE.
 #include <memory>
 
 class Cell;
-typedef Cell* CellPtr;
 
 class Coverings 
 {

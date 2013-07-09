@@ -35,3 +35,30 @@ SET VS90COMNTOOLS=%VS110COMNTOOLS%
 
 Once this is done, the build process should be the same on windows as on linux.
 
+If you prefer, VS2012 Express Edition solution/project files are available for
+windows and a makefile is available that should work on Linux.
+
+The windows solution/project files are : exactcover_cxx.sln and 
+exactcover_cxx.vcxproj .   If you go that route, you may need to 
+specify the directories where the Python include and library files 
+are to be found.  The prebuilt Python distributions do not come with
+a debug version of the python library so you will probably need to specify 
+the "Solution Configuration", "Release" from within Visual Studio.
+
+Once you have built using any of the above methods you should be able to test
+your build by running "python pentominoes.py" from the command line. You
+should see the following output.
+
+Example covering:
+
+llxuuvvv
+lxxxuvzz
+lfxuuvzn
+lff  zzn
+ffy  wnn
+yyyywwnt
+pppwwttt
+ppiiiiit
+
+I copied the pentominos.py script from https://github.com/kwaters/exactcover
+which is a similar project to this one.

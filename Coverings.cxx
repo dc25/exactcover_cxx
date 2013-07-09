@@ -31,6 +31,8 @@ THE SOFTWARE.
 
 using namespace std;
 
+typedef Cell* CellPtr;
+
 class Cell {
 public:
     Cell()
@@ -43,8 +45,13 @@ public:
         delete[] m_name;
     }
 
-    CellPtr m_left, m_right, m_up, m_down, col;
-    unsigned int m_useCount;
+    Cell* m_left;
+    Cell* m_right;
+    Cell* m_up;
+    Cell* m_down;
+    Cell* col;
+
+	unsigned int m_useCount;
 
     char* m_name;
 };
