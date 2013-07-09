@@ -166,7 +166,7 @@ def main():
 
     print "Example covering:"
     # Take the first result from the iterator.
-    solver = exactcover.Coverings(m, c)
+    solver = exactcover_cxx.Coverings(m, c)
 
     solution = solver.getSolution()
     if solution is None:
@@ -177,7 +177,7 @@ def main():
 
     # Count the number of results returned by the iterator.
     # print "There are {0} unique tilings.".format(
-    #     sum(1 for x in exactcover.Coverings(m)))
+    #     sum(1 for x in exactcover_cxx.Coverings(m)))
 
 
 if __name__ == '__main__':
