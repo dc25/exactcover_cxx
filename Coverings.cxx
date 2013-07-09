@@ -47,7 +47,7 @@ public:
     Cell* m_right;
     Cell* m_up;
     Cell* m_down;
-    Cell* col;
+    Cell* m_col;
 
 	unsigned int m_useCount;
 
@@ -67,7 +67,7 @@ static void unlinkCol(Cell* c)
         {
             row_it->m_down->m_up = row_it->m_up;
             row_it->m_up->m_down = row_it->m_down;
-            row_it->col->m_useCount--;
+            row_it->m_col->m_useCount--;
         }
 
     }
@@ -82,7 +82,7 @@ static void linkCol(Cell* c)
     {
         for (auto row_it = r->m_left; row_it != r; row_it = row_it->m_left)
         {
-            row_it->col->m_useCount++;
+            row_it->m_col->m_useCount++;
             row_it->m_up->m_down = row_it;
             row_it->m_down->m_up = row_it;
         }
@@ -100,7 +100,7 @@ static void unlinkRow(Cell* row)
     // to making this call.  This is as in Knuth's dancing links paper.
     for (auto row_it = row->m_right; row_it != row; row_it = row_it->m_right)
     {
-        unlinkCol(row_it->col);
+        unlinkCol(row_it->m_col);
     }
 }
 
@@ -109,7 +109,7 @@ static void linkRow(Cell* row)
 {
     for (auto row_it = row->m_left; row_it != row; row_it = row_it->m_left)
     {
-        linkCol(row_it->col);
+        linkCol(row_it->m_col);
     }
 }
 
@@ -157,7 +157,7 @@ bool Coverings::backup()
 
         // Advance to the next row in this column if there is one.
         row = row->m_down;
-        if (row != row->col)
+        if (row != row->m_col)
         {
             // if there is another row in this column then use it.
             m_solution.push_back(row);
@@ -166,7 +166,7 @@ bool Coverings::backup()
         } else
         {
             // There were no more rows in this column so put it back .
-            linkCol(row->col);
+            linkCol(row->m_col);
         }
     }
     // All columns were fully advanced so there's no more work to be done.
@@ -186,7 +186,7 @@ void Coverings::makeNameSolution()
         std::vector<string> temp;
         for ( auto e = r; true;)
         {
-            temp.push_back(e->col->m_name);
+            temp.push_back(e->m_col->m_name);
             e=e->m_right;
             if (e == r)
             {
@@ -263,7 +263,7 @@ Coverings::Coverings(
         column->m_name = new char[columns[col].size() + 1];
         strcpy(column->m_name, columns[col].c_str());
         columnMap[columns[col]] = column;  // save for lookup by name.
-        column->col = column;
+        column->m_col = column;
         column->m_up = column;
         column->m_down = column;
 
@@ -284,7 +284,7 @@ Coverings::Coverings(
         {
             auto column = columnMap[usageRow[eIndex]]; // lookup by cell name.
             auto e = new Cell();
-            e->col = column;
+            e->m_col = column;
             e->m_down = column;
             e->m_up = column->m_up;
             e->m_down->m_up = e;
