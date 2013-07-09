@@ -44,10 +44,6 @@ public:
     unsigned int num_searches;
 
 private:
-    void connectLinks( 
-        const std::vector< std::vector< int > >& usage, 
-        const std::vector< std::string >& columns);
-
     Cell* smallestCol() const;
     void advance();
     bool backup();

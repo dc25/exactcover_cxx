@@ -31,8 +31,6 @@ THE SOFTWARE.
 
 using namespace std;
 
-typedef Cell* CellPtr;
-
 class Cell {
 public:
     Cell()
@@ -57,7 +55,7 @@ public:
 };
 
 // Remove a column (unlink it) from its Coverings object.  
-static void unlinkCol(CellPtr c)
+static void unlinkCol(Cell* c)
 {
     // unlink from linked list of columns.
     c->m_right->m_left = c->m_left;
@@ -78,7 +76,7 @@ static void unlinkCol(CellPtr c)
 
 // Put a column (link it) back into its Coverings object.  
 // Sequence of operations is reverse of unlink.
-static void linkCol(CellPtr c)
+static void linkCol(Cell* c)
 {
     for (auto r = c->m_up; r != c; r = r->m_up)
     {
@@ -95,7 +93,7 @@ static void linkCol(CellPtr c)
 }
 
 // Remove (unlink) a row from its Coverings object.
-static void unlinkRow(CellPtr row)
+static void unlinkRow(Cell* row)
 {
     // Note that we unlink every column *except* for the one that the cell
     // that we start with is actually in.  That column was unlinked prior
@@ -107,7 +105,7 @@ static void unlinkRow(CellPtr row)
 }
 
 // Put (link) a row back into its Coverings object.
-static void linkRow(CellPtr row)
+static void linkRow(Cell* row)
 {
     for (auto row_it = row->m_left; row_it != row; row_it = row_it->m_left)
     {
@@ -115,9 +113,9 @@ static void linkRow(CellPtr row)
     }
 }
 
-CellPtr Coverings::smallestCol( ) const
+Cell* Coverings::smallestCol( ) const
 {
-    CellPtr smallest = nullptr;
+    Cell* smallest = nullptr;
     for (auto col = m_root->m_right; col != m_root; col = col->m_right)
     {
         if (smallest == nullptr || smallest->m_useCount > col->m_useCount)
@@ -256,7 +254,7 @@ Coverings::Coverings(
     auto colCount = columns.size();
     auto rowCount = usage.size();
 
-    std::map<std::string, CellPtr> columnMap;
+    std::map<std::string, Cell*> columnMap;
 
     // connect the column head links
     for (unsigned int col = 0; col < colCount; ++col)
@@ -279,7 +277,7 @@ Coverings::Coverings(
     // for each row ...
     for (unsigned int row = 0; row < rowCount; ++row)
     {
-        CellPtr firstInRow = nullptr;
+        Cell* firstInRow = nullptr;
         auto usageRow = usage[row];
         // link up a Cell for each row entry that is used.
         for (unsigned int eIndex = 0; eIndex < usageRow.size(); ++eIndex)
