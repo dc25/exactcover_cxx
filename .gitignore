@@ -14,5 +14,5 @@
 *.so
 Debug/
 Release/
-exactcover.py
-exactcover_wrap.cxx
+exactcover_cxx.py
+exactcover_cxx_wrap.cxx
