@@ -37,7 +37,7 @@ using namespace std;
 class Cell {
 public:
     Cell()
-        : m_left(0), m_right(0), m_up(0), m_down(0), m_useCount(0), m_name(0)
+        : m_left(0), m_right(0), m_up(0), m_down(0), m_col(0), m_useCount(0), m_name(0)
     {
     }
 
@@ -54,7 +54,7 @@ public:
 
 	unsigned int m_useCount;
 
-    char* m_name;
+    char* m_name;  // tried using a string here but that slowed down run time noticably.
 };
 
 // Remove a column (unlink it) from its Coverings object.  
@@ -179,8 +179,8 @@ bool Coverings::backup()
 // Generate a vector of names from the existing vector of rows.
 void Coverings::makeNameSolution()
 {
-    shared_ptr<Answer> nameSolution = make_shared<Answer>();
-    nameSolution->resize(m_solution.size());
+    m_nameSolution = make_shared<Answer>();
+    m_nameSolution->resize(m_solution.size());
     unsigned int solutionIndex = 0;
     for ( auto r : m_solution )
     {
@@ -200,7 +200,7 @@ void Coverings::makeNameSolution()
 
         for (auto name : temp)
         {
-            nameSolution->getRow(solutionIndex).push_back(string(name));
+            m_nameSolution->getRow(solutionIndex).push_back(name);
         }
         solutionIndex++;
     }
@@ -269,8 +269,9 @@ Coverings::Coverings(
     for (unsigned int col = 0; col < colCount; ++col)
     {
         auto column = new Cell();
-        column->m_name = new char[columns[col].size() + 1];
-        strcpy(column->m_name, columns[col].c_str());
+        auto bufferSize = columns[col].size() + 1;
+        column->m_name = new char[bufferSize];
+        strcpy_s(column->m_name, bufferSize, columns[col].c_str());
         columnMap[columns[col]] = column;  // save for lookup by name.
         column->m_col = column;
         column->m_up = column;
