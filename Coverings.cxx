@@ -129,54 +129,6 @@ Cell* Coverings::smallestCol( ) const
     return smallest;
 }
 
-void Coverings::advance()
-{
-    for (auto smallest = smallestCol(); smallest; smallest = smallestCol())
-    {
-        if (smallest->m_useCount == 0) 
-        {
-            // No way to "cover" this location so we must backtrack
-            break;
-        }
-
-        ++num_searches;
-        unlinkCol(smallest);
-
-        auto row = smallest->m_down;
-        m_solution.push_back(row);
-        unlinkRow(row);
-    }
-}
-
-bool Coverings::backup()
-{
-    while (m_solution.size())
-    {
-        auto row = m_solution.back();
-        m_solution.pop_back();
-
-        // We are done using this row in this column so restore its columns.
-        linkRow(row);
-
-        // Advance to the next row in this column if there is one.
-        row = row->m_down;
-        if (row != row->m_col)
-        {
-            // if there is another row in this column then use it.
-            m_solution.push_back(row);
-            unlinkRow(row);
-            return true;
-        } else
-        {
-            // There were no more rows in this column so put it back .
-            linkCol(row->m_col);
-        }
-    }
-    // All columns were fully advanced so there's no more work to be done.
-    return false;
-}
-
-
 // Generate a vector of names from the existing vector of rows.
 void Coverings::makeNameSolution()
 {

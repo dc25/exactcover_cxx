@@ -49,8 +49,6 @@ public:
 
 private:
     Cell* smallestCol() const;
-    void advance();
-    bool backup();
     void search();
     void recursiveSearch();
 
@@ -59,7 +57,6 @@ private:
     Cell* m_root;
     std::vector<Cell* > m_solution;
     SafeQueue<std::shared_ptr<Answer> >  m_solutionQueue;
-    std::shared_ptr<Answer> m_nameSolution;
     std::thread m_worker;
 };
 
