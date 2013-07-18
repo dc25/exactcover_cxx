@@ -24,16 +24,20 @@ THE SOFTWARE.
 /* exactcover_cxx.i */
 %module exactcover_cxx
 %{
+#include "Answer.h"
 #include "Coverings.h"
 %}
 
 %include "std_vector.i"
 %include "std_string.i"
+%include "std_shared_ptr.i"
 
 namespace std {
 %template(stringVector)  vector < string >;
 %template(stringArray)  vector< vector < string > >;
 }   
+%shared_ptr(Answer)
 
+%include "Answer.h"
 %include "Coverings.h"
 

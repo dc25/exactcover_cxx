@@ -26,12 +26,16 @@ THE SOFTWARE.
 
 #include <vector>
 #include <memory>
+#include <thread>
+#include "SafeQueue.h"
 
 class Cell;
+class Answer;
 
 class Coverings 
 {
 public:
+
     Coverings(
         const std::vector< std::vector< std::string > >& usage,
         const std::vector< std::string >& columns,
@@ -39,7 +43,7 @@ public:
 
     ~Coverings();
 
-    const std::vector< std::vector<std::string> >* getSolution();
+    std::shared_ptr<Answer> getSolution();
 
     unsigned int num_searches;
 
@@ -47,12 +51,15 @@ private:
     Cell* smallestCol() const;
     void advance();
     bool backup();
+    void solve();
 
     void makeNameSolution();
 
     Cell* m_root;
     std::vector<Cell* > m_solution;
-    std::vector < std::vector<std::string> > m_nameSolution;
+    SafeQueue<std::shared_ptr<Answer> >  m_solutionQueue;
+    std::shared_ptr<Answer> m_nameSolution;
+    std::thread m_worker;
 };
 
 

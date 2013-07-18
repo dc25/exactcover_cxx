@@ -23,11 +23,14 @@ THE SOFTWARE.
 
 
 #include "Coverings.h"
+#include "Answer.h"
 #include <string.h>
 #include <vector>
 #include <map>
 #include <algorithm>
 #include <string>
+
+#include <iostream>
 
 using namespace std;
 
@@ -176,8 +179,8 @@ bool Coverings::backup()
 // Generate a vector of names from the existing vector of rows.
 void Coverings::makeNameSolution()
 {
-    m_nameSolution.resize(0);
-    m_nameSolution.resize(m_solution.size());
+    shared_ptr<Answer> nameSolution = make_shared<Answer>();
+    nameSolution->resize(m_solution.size());
     unsigned int solutionIndex = 0;
     for ( auto r : m_solution )
     {
@@ -197,7 +200,7 @@ void Coverings::makeNameSolution()
 
         for (auto name : temp)
         {
-            m_nameSolution[solutionIndex].push_back(string(name));
+            nameSolution->getRow(solutionIndex).push_back(string(name));
         }
         solutionIndex++;
     }
@@ -206,7 +209,7 @@ void Coverings::makeNameSolution()
 // Repeat advance/backup/advance until a solution is reached.
 // From row based solution, generate string based solution.
 // Return pointer to string based solution or nullptr if none exists.
-const std::vector< std::vector<string> >* Coverings::getSolution() 
+shared_ptr<Answer> Coverings::getSolution() 
 {
     if (m_root == m_root->m_right)
     {
@@ -223,7 +226,7 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
         if (m_root == m_root->m_right)
         {
             makeNameSolution();
-            return &m_nameSolution;
+            return m_nameSolution;
         }
 
         if (!backup())
@@ -232,6 +235,12 @@ const std::vector< std::vector<string> >* Coverings::getSolution()
         }
     }
     return nullptr; // should never get here
+}
+
+void Coverings::solve()
+{
+
+
 }
 
 // Usage matrix has a row for every possible placement of every puzzle 
@@ -318,6 +327,8 @@ Coverings::Coverings(
     }
 
     m_root = root;
+
+    m_worker = std::thread(&Coverings::solve, this);
 }
 
 Coverings::~Coverings()
