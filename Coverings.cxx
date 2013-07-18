@@ -176,11 +176,12 @@ bool Coverings::backup()
     return false;
 }
 
+
 // Generate a vector of names from the existing vector of rows.
 void Coverings::makeNameSolution()
 {
-    m_nameSolution = make_shared<Answer>();
-    m_nameSolution->resize(m_solution.size());
+    shared_ptr<Answer> answer( new Answer() );
+    answer->resize(m_solution.size());
     unsigned int solutionIndex = 0;
     for ( auto r : m_solution )
     {
@@ -200,10 +201,11 @@ void Coverings::makeNameSolution()
 
         for (auto name : temp)
         {
-            m_nameSolution->getRow(solutionIndex).push_back(name);
+            answer->getRow(solutionIndex).push_back(string(name));
         }
         solutionIndex++;
     }
+    m_solutionQueue.push(answer);
 }
 
 // Repeat advance/backup/advance until a solution is reached.
@@ -211,36 +213,43 @@ void Coverings::makeNameSolution()
 // Return pointer to string based solution or nullptr if none exists.
 shared_ptr<Answer> Coverings::getSolution() 
 {
-    if (m_root == m_root->m_right)
-    {
-        if (!backup())
-        {
-            return nullptr;
-        }
-    }
-
-    while (true)
-    {
-        advance();
-
-        if (m_root == m_root->m_right)
-        {
-            makeNameSolution();
-            return m_nameSolution;
-        }
-
-        if (!backup())
-        {
-            return nullptr;
-        }
-    }
-    return nullptr; // should never get here
+    return m_solutionQueue.deque();
 }
 
-void Coverings::solve()
+void Coverings::recursiveSearch( )
 {
+    if (m_root == m_root->m_right)
+    {
+        makeNameSolution();
+        return;
+    }
 
+    auto smallest=smallestCol();
+    if (smallest->m_useCount == 0) 
+    {
+        // No way to "cover" this location so we must backtrack
+        return;
+    }
 
+    ++num_searches;
+    unlinkCol(smallest);
+
+    for (auto row = smallest->m_down; row != smallest; row = row->m_down)
+    {
+        m_solution.push_back(row);
+        unlinkRow(row);
+        recursiveSearch();
+        linkRow(row);
+        m_solution.pop_back();
+    }
+
+    linkCol(smallest);
+}
+
+void Coverings::search( )
+{
+    recursiveSearch();
+    m_solutionQueue.push(shared_ptr<Answer>(nullptr));
 }
 
 // Usage matrix has a row for every possible placement of every puzzle 
@@ -329,7 +338,7 @@ Coverings::Coverings(
 
     m_root = root;
 
-    m_worker = std::thread(&Coverings::solve, this);
+    m_worker = std::thread(&Coverings::search, this);
 }
 
 Coverings::~Coverings()

@@ -51,7 +51,8 @@ private:
     Cell* smallestCol() const;
     void advance();
     bool backup();
-    void solve();
+    void search();
+    void recursiveSearch();
 
     void makeNameSolution();
 
