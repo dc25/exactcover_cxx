@@ -79,6 +79,7 @@
     <ClCompile Include="exactcover_cxx_wrap.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Answer.h" />
     <ClInclude Include="Coverings.h" />
     <ClInclude Include="SafeQueue.h" />
   </ItemGroup>
