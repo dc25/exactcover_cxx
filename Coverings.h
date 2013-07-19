@@ -39,6 +39,7 @@ public:
     Coverings(
         const std::vector< std::vector< std::string > >& usage,
         const std::vector< std::string >& columns,
+        const std::vector< std::vector< std::string > >& startingSolution,
         unsigned int secondary=0);
 
     ~Coverings();

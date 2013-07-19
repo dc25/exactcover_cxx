@@ -214,6 +214,7 @@ void Coverings::search( )
 Coverings::Coverings(
     const std::vector< std::vector< std::string > >& usage,
     const std::vector< std::string >& columns,
+    const std::vector< std::vector< std::string > >& startingSolution,
     unsigned int secondary)
     : num_searches(0)
 {
@@ -290,6 +291,7 @@ Coverings::Coverings(
 
     m_root = root;
 
+    // The search is on... in a new thread.
     m_worker = std::thread(&Coverings::search, this);
 }
 
