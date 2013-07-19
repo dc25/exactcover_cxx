@@ -151,7 +151,8 @@ def solution_str(solution):
         grid[y][x] = '.'
 
     # Mark each pentomino by its name.
-    for row in solution:
+    for r in range(solution.size()):
+        row = solution.getRow(r)
         c = row[-1]
         for coords in row[:-1]:
             x, y = [int(d.strip()) for d in coords.split(',')]
@@ -163,10 +164,11 @@ def solution_str(solution):
 def main():
     m = matrix()
     c = columns(m)
+    startingSolution = [ [ ] ]
 
     print "Example covering:"
     # Take the first result from the iterator.
-    solver = exactcover_cxx.Coverings(m, c)
+    solver = exactcover_cxx.Coverings(m, c, startingSolution)
 
     solution = solver.getSolution()
     if solution is None:
