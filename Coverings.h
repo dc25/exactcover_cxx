@@ -45,6 +45,9 @@ public:
     ~Coverings();
 
     std::shared_ptr<Answer> getSolution();
+    std::shared_ptr<Answer> getState();
+    void respondToStateRequest( );
+
 
     unsigned int num_searches;
 
@@ -53,12 +56,19 @@ private:
     void search();
     void recursiveSearch();
 
-    void makeNameSolution();
-
     Cell* m_root;
     std::vector<Cell* > m_solution;
     SafeQueue<std::shared_ptr<Answer> >  m_solutionQueue;
+    std::shared_ptr<Answer> m_startingSolution;
+
     std::thread m_worker;
+
+    // state and state request related variables.
+    std::shared_ptr<Answer> m_solverState;
+    bool m_stateRequest;
+    std::mutex m_stateRequestMutex;
+    std::condition_variable m_stateReady;
+
 };
 
 

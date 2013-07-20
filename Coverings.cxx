@@ -21,9 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-
 #include "Coverings.h"
 #include "Answer.h"
+#include "Cell.h"
 #include <string.h>
 #include <vector>
 #include <map>
@@ -33,29 +33,6 @@ THE SOFTWARE.
 #include <iostream>
 
 using namespace std;
-
-class Cell {
-public:
-    Cell()
-        : m_left(0), m_right(0), m_up(0), m_down(0), m_col(0), m_useCount(0), m_name(0)
-    {
-    }
-
-    ~Cell()
-    {
-        delete[] m_name;
-    }
-
-    Cell* m_left;
-    Cell* m_right;
-    Cell* m_up;
-    Cell* m_down;
-    Cell* m_col;
-
-	unsigned int m_useCount;
-
-    char* m_name;  // tried using a string here but that slowed down run time noticably.
-};
 
 // Remove a column (unlink it) from its Coverings object.  
 static void unlinkCol(Cell* c)
@@ -129,50 +106,42 @@ Cell* Coverings::smallestCol( ) const
     return smallest;
 }
 
-// Generate a vector of names from the existing vector of rows.
-void Coverings::makeNameSolution()
-{
-    shared_ptr<Answer> answer( new Answer() );
-    answer->resize(m_solution.size());
-    unsigned int solutionIndex = 0;
-    for ( auto r : m_solution )
-    {
-        // Sort because convention is to expect piece name
-        // to be last item in each row for the solution.
-        std::vector<string> temp;
-        for ( auto e = r; true;)
-        {
-            temp.push_back(e->m_col->m_name);
-            e=e->m_right;
-            if (e == r)
-            {
-                break;
-            }
-        }
-        sort(temp.begin(), temp.end());
-
-        for (auto name : temp)
-        {
-            answer->getRow(solutionIndex).push_back(string(name));
-        }
-        solutionIndex++;
-    }
-    m_solutionQueue.push(answer);
-}
-
-// Repeat advance/backup/advance until a solution is reached.
-// From row based solution, generate string based solution.
-// Return pointer to string based solution or nullptr if none exists.
 shared_ptr<Answer> Coverings::getSolution() 
 {
     return m_solutionQueue.deque();
 }
 
+std::shared_ptr<Answer> Coverings::getState()
+{
+    std::unique_lock<std::mutex> lock(m_stateRequestMutex);
+    m_stateRequest = true;
+    while(m_stateRequest) 
+    {
+        m_stateReady.wait(lock);
+    }
+    return m_solverState;
+}
+
+
+void Coverings::respondToStateRequest( )
+{
+    std::lock_guard<std::mutex> lock(m_stateRequestMutex);
+    if (m_stateRequest)
+    {
+        m_solverState = make_shared<Answer>(m_solution);
+        m_stateRequest = false;
+        m_stateReady.notify_one();
+    }
+}
+
+
 void Coverings::recursiveSearch( )
 {
+    respondToStateRequest();
+
     if (m_root == m_root->m_right)
     {
-        makeNameSolution();
+        m_solutionQueue.push(make_shared<Answer>(m_solution));
         return;
     }
 
@@ -188,6 +157,24 @@ void Coverings::recursiveSearch( )
 
     for (auto row = smallest->m_down; row != smallest; row = row->m_down)
     {
+        // if we have a starting solution, then fast forward loop until
+        // we hit the first row in the starting solution.
+        if (m_startingSolution)
+        {
+            if (!m_startingSolution->matchesFirstRow(row))
+            {
+                continue;
+            } else
+            {
+                // Once we hit the first row, then remove it.  If that
+                // empties the starting solution then delete the starting solution.
+                m_startingSolution->removeFirstRow();
+                if (m_startingSolution->size() == 0)
+                {
+                    m_startingSolution = NULL;
+                }
+            }
+        }
         m_solution.push_back(row);
         unlinkRow(row);
         recursiveSearch();
@@ -216,8 +203,20 @@ Coverings::Coverings(
     const std::vector< std::string >& columns,
     const std::vector< std::vector< std::string > >& startingSolution,
     unsigned int secondary)
-    : num_searches(0)
+    : num_searches(0), m_stateRequest(false)
 {
+
+    for (auto row : startingSolution)
+    {
+        cout << "ROW: ";
+        for (auto str : row )
+        {
+            cout << str.c_str() << ", ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
     auto root = new Cell();
     root->m_left = root;
     root->m_right = root;
@@ -290,6 +289,14 @@ Coverings::Coverings(
     }
 
     m_root = root;
+
+    if (startingSolution.size())
+    {
+        m_startingSolution = make_shared<Answer>(startingSolution);
+    } else
+    {
+        m_startingSolution = shared_ptr<Answer>(nullptr);
+    }
 
     // The search is on... in a new thread.
     m_worker = std::thread(&Coverings::search, this);
