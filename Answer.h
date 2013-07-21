@@ -5,40 +5,35 @@
 #include <vector>
 #include <memory>
 
-class Cell;
-
 class Answer {
 public:
-    Answer(const std::vector<Cell* >& solution);
+    Answer(const Answer& nameSolution);
 
-    Answer(const std::vector < std::vector<std::string> >& nameSolution);
-
-    void resize(size_t s)
-    {
-        m_nameSolution.resize(s);
-    }
-
-    std::vector<std::string>& getRow(size_t index)
-    {
-        return *(m_nameSolution[index]);
-    }
-
-    const std::vector<std::string>& getRow(size_t index) const
-    {
-        return *(m_nameSolution[index]);
-    }
+    Answer(const std::vector< std::vector<std::string> >& vvs);
 
     size_t size() const
     {
         return m_nameSolution.size();
     }
 
-    bool matchesFirstRow(const Cell* row) const;
-
-
-    void removeFirstRow() 
+    void resize(size_t s)
     {
-        m_nameSolution.erase(m_nameSolution.begin());
+        m_nameSolution.resize(s);
+    }
+
+    void push_back(std::shared_ptr< std::vector<std::string> > pvs)
+    {
+        m_nameSolution.push_back(pvs);
+    }
+
+    void pop_back()
+    {
+        m_nameSolution.pop_back();
+    }
+
+    const std::vector<std::string>& getRow(size_t index) const
+    {
+        return *(m_nameSolution[index]);
     }
 
 private:

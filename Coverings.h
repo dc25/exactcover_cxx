@@ -53,13 +53,12 @@ public:
 
 private:
     Cell* smallestCol() const;
+    void recursiveSearch(unsigned int level);
     void search();
-    void recursiveSearch();
 
-    Cell* m_root;
-    std::vector<Cell* > m_solution;
+    Cell* m_root;  // entry to the sparse matrix of cells.
+    std::shared_ptr<Answer> m_solution;
     SafeQueue<std::shared_ptr<Answer> >  m_solutionQueue;
-    std::shared_ptr<Answer> m_startingSolution;
 
     std::thread m_worker;
 

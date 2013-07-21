@@ -23,7 +23,6 @@ THE SOFTWARE.
 
 #include "Coverings.h"
 #include "Answer.h"
-#include "Cell.h"
 #include <string.h>
 #include <vector>
 #include <map>
@@ -33,6 +32,31 @@ THE SOFTWARE.
 #include <iostream>
 
 using namespace std;
+
+class Cell {
+public:
+    Cell()
+        : m_left(0), m_right(0), m_up(0), m_down(0), m_col(0), m_useCount(0), m_name(0)
+    {
+    }
+
+    ~Cell()
+    {
+        delete[] m_name;
+    }
+
+    Cell* m_left;
+    Cell* m_right;
+    Cell* m_up;
+    Cell* m_down;
+    Cell* m_col;
+
+    std::shared_ptr< std::vector<std::string> > m_nameVector;
+
+	unsigned int m_useCount;
+
+    char* m_name;  // tried using a string here but that slowed down run time 
+};
 
 // Remove a column (unlink it) from its Coverings object.  
 static void unlinkCol(Cell* c)
@@ -111,6 +135,8 @@ shared_ptr<Answer> Coverings::getSolution()
     return m_solutionQueue.deque();
 }
 
+// Set bool to request state from solver thread.  Wait for solver thread
+// to save current state and reset bool indicating that state is ready.
 std::shared_ptr<Answer> Coverings::getState()
 {
     std::unique_lock<std::mutex> lock(m_stateRequestMutex);
@@ -122,26 +148,48 @@ std::shared_ptr<Answer> Coverings::getState()
     return m_solverState;
 }
 
-
+// Check for a request for current state.  If request was made, then
+// make the state, and notify the requester that the state is ready.
 void Coverings::respondToStateRequest( )
 {
     std::lock_guard<std::mutex> lock(m_stateRequestMutex);
     if (m_stateRequest)
     {
-        m_solverState = make_shared<Answer>(m_solution);
+        m_solverState = make_shared<Answer>(*m_solution);
         m_stateRequest = false;
         m_stateReady.notify_one();
     }
 }
 
+// return true if vectors in strings are equal; false otherwise.
+static bool equalStringVectors(
+    const vector<string>& v0, 
+    const vector<string>& v1)
+{
 
-void Coverings::recursiveSearch( )
+    if (v0.size() != v1.size())
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < v0.size(); ++i)
+    {
+        if (v0[i] != v1[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+void Coverings::recursiveSearch(unsigned int level)
 {
     respondToStateRequest();
 
     if (m_root == m_root->m_right)
     {
-        m_solutionQueue.push(make_shared<Answer>(m_solution));
+        m_solutionQueue.push(make_shared<Answer>(*m_solution));
         return;
     }
 
@@ -159,27 +207,20 @@ void Coverings::recursiveSearch( )
     {
         // if we have a starting solution, then fast forward loop until
         // we hit the first row in the starting solution.
-        if (m_startingSolution)
+        if (m_solution->size() > level)
         {
-            if (!m_startingSolution->matchesFirstRow(row))
+            if (!equalStringVectors(m_solution->getRow(level), *(row->m_nameVector)))
             {
                 continue;
-            } else
-            {
-                // Once we hit the first row, then remove it.  If that
-                // empties the starting solution then delete the starting solution.
-                m_startingSolution->removeFirstRow();
-                if (m_startingSolution->size() == 0)
-                {
-                    m_startingSolution = NULL;
-                }
             }
+        } else
+        {
+            m_solution->push_back(row->m_nameVector);
         }
-        m_solution.push_back(row);
         unlinkRow(row);
-        recursiveSearch();
+        recursiveSearch(level+1);
         linkRow(row);
-        m_solution.pop_back();
+        m_solution->pop_back();
     }
 
     linkCol(smallest);
@@ -187,7 +228,7 @@ void Coverings::recursiveSearch( )
 
 void Coverings::search( )
 {
-    recursiveSearch();
+    recursiveSearch(0);
     m_solutionQueue.push(shared_ptr<Answer>(nullptr));
 }
 
@@ -307,13 +348,7 @@ Coverings::Coverings(
 
     m_root = root;
 
-    if (startingSolution.size())
-    {
-        m_startingSolution = make_shared<Answer>(startingSolution);
-    } else
-    {
-        m_startingSolution = shared_ptr<Answer>(nullptr);
-    }
+    m_solution = make_shared<Answer>(startingSolution);
 
     // The search is on... in a new thread.
     m_worker = std::thread(&Coverings::search, this);
