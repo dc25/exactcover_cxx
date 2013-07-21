@@ -30,7 +30,7 @@ THE SOFTWARE.
 
 template<class T> class SafeQueue {
 public:
-    void push(T &entry)
+    void push(const T &entry)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_queue.push(entry);
