@@ -205,18 +205,6 @@ Coverings::Coverings(
     unsigned int secondary)
     : num_searches(0), m_stateRequest(false)
 {
-
-    for (auto row : startingSolution)
-    {
-        cout << "ROW: ";
-        for (auto str : row )
-        {
-            cout << str.c_str() << ", ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-
     auto root = new Cell();
     root->m_left = root;
     root->m_right = root;
