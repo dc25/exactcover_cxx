@@ -5,79 +5,36 @@
 using namespace std;
 
 
-static void rowToSortedString(const Cell* row, /*output*/ vector<string>& vstr)
-{
-    for ( auto e = row; true;)
-    {
-        vstr.push_back(e->m_col->m_name);
-        e=e->m_right;
-        if (e == row)
-        {
-            break;
-        }
-    }
-    sort(vstr.begin(), vstr.end());
-}
-
-
-
 Answer::Answer(const std::vector<Cell* >& solution)
 {
     resize(solution.size());
     for (size_t i = 0; i < size(); ++i)
     {
-        m_nameSolution[i] = make_shared< vector <string> >();
-    }
-
-    unsigned int solutionIndex = 0;
-    for ( auto r : solution )
-    {
-        // Sort because convention is to expect piece name
-        // to be last item in each row for the solution.
-        std::vector<string> temp;
-
-        rowToSortedString(r, temp);
-
-        for (auto name : temp)
-        {
-            getRow(solutionIndex).push_back(name);
-        }
-        solutionIndex++;
+        m_nameSolution[i] = solution[i]->m_nameVector;
     }
 }
 
 Answer::Answer(const std::vector < std::vector<std::string> >& nameSolution)
 {
-    resize(nameSolution.size());
-    for (size_t i = 0; i < size(); ++i)
+    m_nameSolution.resize(nameSolution.size());
+    for (size_t i = 0; i < nameSolution.size(); ++i)
     {
         m_nameSolution[i] = make_shared< vector <string> >();
-    }
-    unsigned int solutionIndex = 0;
-    for ( auto r : nameSolution )
-    {
+        std::vector<std::string>& row = getRow(i);
+        for ( auto s : nameSolution[i])
+        {
+            row.push_back(s);
+        }
         // Sort because convention is to expect piece name
         // to be last item in each row for the solution.
-        std::vector<string> temp;
-        for ( auto s : r)
-        {
-            temp.push_back(s);
-        }
-        sort(temp.begin(), temp.end());
-
-        for (auto name : temp)
-        {
-            getRow(solutionIndex).push_back(name);
-        }
-        solutionIndex++;
+        sort(row.begin(), row.end());
     }
 }
 
 
 bool Answer::matchesFirstRow(const Cell* row) const 
 {
-    std::vector<string> rowNames;
-    rowToSortedString(row, rowNames);
+    const vector<string>& rowNames = *(row->m_nameVector);
 
     const vector<string>& answerNames = getRow(0);
 
