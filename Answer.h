@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class Cell;
 
@@ -19,12 +20,12 @@ public:
 
     std::vector<std::string>& getRow(size_t index)
     {
-        return m_nameSolution[index];
+        return *(m_nameSolution[index]);
     }
 
     const std::vector<std::string>& getRow(size_t index) const
     {
-        return m_nameSolution[index];
+        return *(m_nameSolution[index]);
     }
 
     size_t size() const
@@ -41,7 +42,7 @@ public:
     }
 
 private:
-    std::vector < std::vector<std::string> > m_nameSolution;
+    std::vector < std::shared_ptr< std::vector<std::string> > > m_nameSolution;
 };
 
 #endif // ANSWER_H__

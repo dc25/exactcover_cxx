@@ -24,6 +24,11 @@ static void rowToSortedString(const Cell* row, /*output*/ vector<string>& vstr)
 Answer::Answer(const std::vector<Cell* >& solution)
 {
     resize(solution.size());
+    for (size_t i = 0; i < size(); ++i)
+    {
+        m_nameSolution[i] = make_shared< vector <string> >();
+    }
+
     unsigned int solutionIndex = 0;
     for ( auto r : solution )
     {
@@ -44,6 +49,10 @@ Answer::Answer(const std::vector<Cell* >& solution)
 Answer::Answer(const std::vector < std::vector<std::string> >& nameSolution)
 {
     resize(nameSolution.size());
+    for (size_t i = 0; i < size(); ++i)
+    {
+        m_nameSolution[i] = make_shared< vector <string> >();
+    }
     unsigned int solutionIndex = 0;
     for ( auto r : nameSolution )
     {
