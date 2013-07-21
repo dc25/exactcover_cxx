@@ -19,6 +19,8 @@ public:
     Cell* m_down;
     Cell* m_col;
 
+    std::shared_ptr< std::vector<std::string> > m_nameVector;
+
 	unsigned int m_useCount;
 
     char* m_name;  // tried using a string here but that slowed down run time noticably.

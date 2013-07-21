@@ -191,6 +191,22 @@ void Coverings::search( )
     m_solutionQueue.push(shared_ptr<Answer>(nullptr));
 }
 
+static shared_ptr< vector<string> > rowToNameVector(const Cell* row)
+{
+    auto res = make_shared<vector<string> >();
+    for ( auto e = row; true;)
+    {
+        res->push_back(e->m_col->m_name);
+        e=e->m_right;
+        if (e == row)
+        {
+            break;
+        }
+    }
+    sort(res->begin(), res->end());
+    return res;
+}
+
 // Usage matrix has a row for every possible placement of every puzzle 
 // piece.  Each usage matrix row contains the name of the piece 
 // and the name of every "cell" of the puzzle that this piece occupies 
@@ -265,6 +281,19 @@ Coverings::Coverings(
 
             }
         }
+
+        // precompute the string based versions of each row. 
+        auto nameVector = rowToNameVector(firstInRow);
+        for (auto e = firstInRow; true;)
+        {
+            e->m_nameVector = nameVector;
+            e = e->m_right;
+            if (e == firstInRow)
+            {
+                break;
+            }
+        }
+
     }
 
     // detach the "secondary" columns.
