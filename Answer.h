@@ -7,8 +7,6 @@
 
 class Answer {
 public:
-    Answer(const Answer& nameSolution);
-
     Answer(const std::vector< std::vector<std::string> >& vvs);
 
     size_t size() const
