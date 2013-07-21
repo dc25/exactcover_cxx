@@ -23,6 +23,7 @@ int main()
 	}
 
 	vector<vector<string>> usage;
+	vector<vector<string>> startingSolution;
 
 	vector<string> row;
 	while (data >> line)
@@ -37,7 +38,7 @@ int main()
 		}
 	}
 
-	auto s = new Coverings(usage,columns, 0);
+	auto s = new Coverings(usage,columns, startingSolution, 0);
 	auto solutionCount = 0;
 	while (auto solution = s->getSolution())
 	{

@@ -68,6 +68,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Answer.cxx" />
     <ClCompile Include="Coverings.cxx" />
     <ClCompile Include="TestMain.cxx" />
   </ItemGroup>
