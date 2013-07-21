@@ -276,7 +276,7 @@ Coverings::Coverings(
         auto column = new Cell();
         auto bufferSize = columns[col].size() + 1;
         column->m_name = new char[bufferSize];
-        strcpy_s(column->m_name, bufferSize, columns[col].c_str());
+        strncpy(column->m_name, columns[col].c_str(), bufferSize);
         columnMap[columns[col]] = column;  // save for lookup by name.
         column->m_col = column;
         column->m_up = column;
