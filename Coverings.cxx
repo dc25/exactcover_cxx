@@ -90,7 +90,6 @@ static void linkCol(Cell* c)
             row_it->m_up->m_down = row_it;
             row_it->m_down->m_up = row_it;
         }
-
     }
     c->m_left->m_right = c;
     c->m_right->m_left = c;
