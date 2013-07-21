@@ -1,17 +1,16 @@
 #ifndef SAFE_QUEUE_H__
 #define SAFE_QUEUE_H__
 
-#include <memory>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 
 template<class T> class SafeQueue {
 public:
-    void push(T &answer)
+    void push(T &entry)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_queue.push(answer);
+        m_queue.push(entry);
         m_notEmpty.notify_one();
     }
 
