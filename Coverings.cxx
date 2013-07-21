@@ -193,6 +193,7 @@ void Coverings::recursiveSearch(unsigned int level)
         return;
     }
 
+    ++num_searches;
     auto smallest=smallestCol();
     if (smallest->m_useCount == 0) 
     {
@@ -200,7 +201,6 @@ void Coverings::recursiveSearch(unsigned int level)
         return;
     }
 
-    ++num_searches;
     unlinkCol(smallest);
 
     for (auto row = smallest->m_down; row != smallest; row = row->m_down)
