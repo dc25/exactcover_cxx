@@ -140,11 +140,13 @@ std::shared_ptr<Answer> Coverings::getState()
 {
     std::unique_lock<std::mutex> lock(m_stateRequestMutex);
     m_stateRequest = true;
-    while(m_stateRequest) 
+    while(m_solverRunning && m_stateRequest) 
     {
         m_stateReady.wait(lock);
     }
-    return m_solverState;
+    auto res = m_solverState;
+    m_solverState = nullptr;
+    return res;
 }
 
 // Check for a request for current state.  If request was made, then
@@ -158,6 +160,17 @@ void Coverings::respondToStateRequest( )
         m_stateRequest = false;
         m_stateReady.notify_one();
     }
+}
+
+void Coverings::lastResponseToStateRequest( )
+{
+    std::lock_guard<std::mutex> lock(m_stateRequestMutex);
+    if (m_stateRequest)
+    {
+        m_stateRequest = false;
+        m_stateReady.notify_one(); // m_solverState should already be nullptr
+    }
+    m_solverRunning = false;
 }
 
 // return true if vectors in strings are equal; false otherwise.
@@ -227,8 +240,10 @@ void Coverings::recursiveSearch(unsigned int level)
 
 void Coverings::search( )
 {
+    m_solverRunning = true;
     recursiveSearch(0);
     m_solutionQueue.push(shared_ptr<Answer>(nullptr));
+    lastResponseToStateRequest();
 }
 
 static shared_ptr< vector<string> > rowToNameVector(const Cell* row)
@@ -259,7 +274,7 @@ Coverings::Coverings(
     const std::vector< std::string >& columns,
     const std::vector< std::vector< std::string > >& startingSolution,
     unsigned int secondary)
-    : num_searches(0), m_stateRequest(false)
+    : num_searches(0), m_stateRequest(false), m_solverRunning(false)
 {
     auto root = new Cell();
     root->m_left = root;

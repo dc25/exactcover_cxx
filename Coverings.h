@@ -46,8 +46,6 @@ public:
 
     std::shared_ptr<Answer> getSolution();
     std::shared_ptr<Answer> getState();
-    void respondToStateRequest( );
-
 
     unsigned int num_searches;
 
@@ -62,13 +60,16 @@ private:
 
     std::thread m_worker;
 
-    // state and state request related variables.
+    // state and state request related methods and variables.
+    void respondToStateRequest( );
+    void lastResponseToStateRequest( );
+
     std::shared_ptr<Answer> m_solverState;
     bool m_stateRequest;
+    bool m_solverRunning;
     std::mutex m_stateRequestMutex;
     std::condition_variable m_stateReady;
 
 };
-
 
 #endif
