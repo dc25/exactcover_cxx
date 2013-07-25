@@ -144,9 +144,7 @@ std::shared_ptr<Answer> Coverings::getState()
     {
         m_stateReady.wait(lock);
     }
-    auto res = m_solverState;
-    m_solverState = nullptr;
-    return res;
+    return m_solverState;
 }
 
 // Check for a request for current state.  If request was made, then
@@ -165,10 +163,11 @@ void Coverings::respondToStateRequest( )
 void Coverings::lastResponseToStateRequest( )
 {
     std::lock_guard<std::mutex> lock(m_stateRequestMutex);
+    m_solverState = make_shared<Answer>(*m_solution);
     if (m_stateRequest)
     {
         m_stateRequest = false;
-        m_stateReady.notify_one(); // m_solverState should already be nullptr
+        m_stateReady.notify_one();
     }
     m_solverRunning = false;
 }
@@ -370,6 +369,7 @@ Coverings::Coverings(
 
 Coverings::~Coverings()
 {
+    m_worker.join();
     for (auto col = m_root->m_right; col != m_root; )
     {
         for (auto e = col->m_down; e != col; )
