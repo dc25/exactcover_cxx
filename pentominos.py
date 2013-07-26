@@ -164,7 +164,7 @@ def solution_str(solution):
 def main():
     m = matrix()
     c = columns(m)
-    startingSolution = [ [ ] ]
+    startingSolution = [ ]
 
     print "Example covering:"
     # Take the first result from the iterator.
