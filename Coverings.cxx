@@ -154,7 +154,13 @@ void Coverings::respondToStateRequest( )
     std::lock_guard<std::mutex> lock(m_stateRequestMutex);
     if (m_stateRequest)
     {
-        m_solverState = make_shared<Answer>(*m_solution);
+        // Return the oldest unprocessed solution if any.
+        m_solverState = m_solutionQueue.front();
+        if (m_solverState == nullptr)
+        {
+            // Otherwise, return the current solution in progress.
+            m_solverState = make_shared<Answer>(*m_solution);
+        }
         m_stateRequest = false;
         m_stateReady.notify_one();
     }
