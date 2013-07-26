@@ -24,6 +24,7 @@ THE SOFTWARE.
 #ifndef SAFE_QUEUE_H__
 #define SAFE_QUEUE_H__
 
+#include <assert.h>
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -35,6 +36,21 @@ public:
         std::lock_guard<std::mutex> lock(m_mutex);
         m_queue.push(entry);
         m_notEmpty.notify_one();
+    }
+
+    T front()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        // default constructor should be a "NULL" T type.
+        T res;
+        if (m_queue.empty())
+        {
+            assert(!res);
+        } else
+        {
+            res = m_queue.front();
+        }
+        return res;
     }
 
     T deque()
