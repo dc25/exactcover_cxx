@@ -25,7 +25,8 @@ LIBNAME = exactcover_cxx
 
 SRCS = \
 	exactcover_cxx_wrap.cxx\
-	Coverings.cxx 
+	Answer.cxx\
+	Coverings.cxx
 
 OBJS =  $(SRCS:.cxx=.o)
 LIB = _$(LIBNAME).so
