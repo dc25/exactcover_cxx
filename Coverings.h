@@ -47,7 +47,7 @@ public:
     std::shared_ptr<Answer> getSolution();
     std::shared_ptr<Answer> getState();
 
-    unsigned int num_searches;
+    unsigned long long int num_searches;
 
 private:
     Cell* smallestCol() const;
