@@ -16,3 +16,4 @@ Debug/
 Release/
 exactcover_cxx.py
 exactcover_cxx_wrap.cxx
+exactcover_cxx_wrap.cpp
