@@ -36,13 +36,40 @@ using namespace std;
 class Cell {
 public:
     Cell()
-        : m_left(0), m_right(0), m_up(0), m_down(0), m_col(0), m_useCount(0), m_name(0)
+        : m_col(nullptr), m_useCount(0), m_name(nullptr)
     {
+        // Regard a new cell as the head of an empty lined list.  Initially all links point to self.
+        m_left = this;
+        m_right = this;
+        m_up = this;
+        m_down = this;
     }
 
     ~Cell()
     {
         delete[] m_name;
+    }
+
+    // append "e" to end of doubly linked list formed using m_left/m_right members.
+    void horizontalAppend(Cell* e)
+    {
+        e->m_right = this;
+        e->m_left = e->m_right->m_left;
+        e->m_right->m_left = e;
+        e->m_left->m_right = e;
+    }
+
+    // Append "e" to bottom of doubly linked list formed using m_up/m_down members.
+    // Also set m_col member of e to point at linked list head and increment list use count.
+    void verticalAppend(Cell* e)
+    {
+        e->m_col = this;
+        e->m_down = this;
+        e->m_up = e->m_down->m_up;
+        e->m_down->m_up = e;
+        e->m_up->m_down = e;
+
+        ++(this->m_useCount);
     }
 
     Cell* m_left;
@@ -139,8 +166,22 @@ shared_ptr<Answer> Coverings::getSolution()
 std::shared_ptr<Answer> Coverings::getState()
 {
     std::unique_lock<std::mutex> lock(m_stateRequestMutex);
+
+    if (!m_solverRunning)
+    {
+        // Return the oldest unprocessed solution if any.
+        m_solverState = m_solutionQueue.front();
+        if (m_solverState == nullptr)
+        {
+            // Otherwise, return the current solution in progress.
+            m_solverState = make_shared<Answer>(*m_solution);
+        }
+        return m_solverState;
+    } 
+
+    // if solver is running, set flag and wait .
     m_stateRequest = true;
-    while(m_solverRunning && m_stateRequest) 
+    while(m_stateRequest) 
     {
         m_stateReady.wait(lock);
     }
@@ -161,21 +202,10 @@ void Coverings::respondToStateRequest( )
             // Otherwise, return the current solution in progress.
             m_solverState = make_shared<Answer>(*m_solution);
         }
+        // tell waiting thread the wait is over and a state is available.
         m_stateRequest = false;
         m_stateReady.notify_one();
     }
-}
-
-void Coverings::lastResponseToStateRequest( )
-{
-    std::lock_guard<std::mutex> lock(m_stateRequestMutex);
-    m_solverState = make_shared<Answer>(*m_solution);
-    if (m_stateRequest)
-    {
-        m_stateRequest = false;
-        m_stateReady.notify_one();
-    }
-    m_solverRunning = false;
 }
 
 // return true if vectors in strings are equal; false otherwise.
@@ -248,49 +278,46 @@ void Coverings::search( )
     m_solverRunning = true;
     recursiveSearch(0);
     m_solutionQueue.push(shared_ptr<Answer>(nullptr));
-    lastResponseToStateRequest();
+    m_solverRunning = false;
+    respondToStateRequest();
 }
 
 static shared_ptr< vector<string> > rowToNameVector(const Cell* row)
 {
     auto res = make_shared<vector<string> >();
-    for ( auto e = row; true;)
-    {
+    auto e = row; 
+    do {
         res->push_back(e->m_col->m_name);
         e=e->m_right;
-        if (e == row)
-        {
-            break;
-        }
-    }
+    } while ( e != row );
+
     sort(res->begin(), res->end());
     return res;
 }
 
-// Usage matrix has a row for every possible placement of every puzzle 
-// piece.  Each usage matrix row contains the name of the piece 
+// Rows matrix has a row for every possible placement of every puzzle 
+// piece.  Each row in the rows matrix contains the name of the piece 
 // and the name of every "cell" of the puzzle that this piece occupies 
 // for this row's placement.  The columns vector has the names of all 
 // the pieces and "cells" of the puzzle.  Really, the naming convention 
 // is arbitrary but the columns should contain all of the names that 
 // are used in all of the rows.
 Coverings::Coverings(
-    const std::vector< std::vector< std::string > >& usage,
+    const std::vector< std::vector< std::string > >& rows,
     const std::vector< std::string >& columns,
     const std::vector< std::vector< std::string > >& startingSolution,
     unsigned int secondary)
     : num_searches(0), m_stateRequest(false), m_solverRunning(false)
 {
-    auto root = new Cell();
-    root->m_left = root;
-    root->m_right = root;
+    m_root = new Cell();
 
     auto colCount = columns.size();
-    auto rowCount = usage.size();
+    auto rowCount = rows.size();
 
+    // Short term map to identify by name which column a row entry belongs to.
     std::map<std::string, Cell*> columnMap;
 
-    // connect the column head links
+    // Connect the column head links
     for (unsigned int col = 0; col < colCount; ++col)
     {
         auto column = new Cell();
@@ -298,14 +325,8 @@ Coverings::Coverings(
         column->m_name = new char[bufferSize];
         strncpy(column->m_name, columns[col].c_str(), bufferSize);
         columnMap[columns[col]] = column;  // save for lookup by name.
-        column->m_col = column;
-        column->m_up = column;
-        column->m_down = column;
 
-        column->m_right = root;
-        column->m_left = root->m_left;
-        column->m_right->m_left = column;
-        column->m_left->m_right = column;
+        m_root->horizontalAppend(column);
 
     }
 
@@ -313,59 +334,40 @@ Coverings::Coverings(
     for (unsigned int row = 0; row < rowCount; ++row)
     {
         Cell* firstInRow = nullptr;
-        auto usageRow = usage[row];
+        auto& oneRow = rows[row];
         // link up a Cell for each row entry that is used.
-        for (unsigned int eIndex = 0; eIndex < usageRow.size(); ++eIndex)
+        for (unsigned int eIndex = 0; eIndex < oneRow.size(); ++eIndex)
         {
-            auto column = columnMap[usageRow[eIndex]]; // lookup by cell name.
+            auto column = columnMap[oneRow[eIndex]]; // lookup by cell name.
             auto e = new Cell();
-            e->m_col = column;
-            e->m_down = column;
-            e->m_up = column->m_up;
-            e->m_down->m_up = e;
-            e->m_up->m_down = e;
-
-            ++(column->m_useCount);
+            column->verticalAppend(e);
             if (!firstInRow)
             {
                 firstInRow = e;
-                e->m_left = e;
-                e->m_right = e;
             } else
             {
-
-                e->m_right = firstInRow;
-                e->m_left = firstInRow->m_left;
-                e->m_right->m_left = e;
-                e->m_left->m_right = e;
-
+                firstInRow->horizontalAppend(e);
             }
         }
 
         // precompute the string based versions of each row. 
         auto nameVector = rowToNameVector(firstInRow);
-        for (auto e = firstInRow; true;)
-        {
+        auto e = firstInRow; 
+        do {
             e->m_nameVector = nameVector;
             e = e->m_right;
-            if (e == firstInRow)
-            {
-                break;
-            }
-        }
+        } while ( e != firstInRow );
 
     }
 
     // detach the "secondary" columns.
     for (unsigned int s = 0; s < secondary; ++s)
     {
-        auto column = root->m_left;
-        root->m_left = column->m_left;
-        root->m_left->m_right = root;
+        auto column = m_root->m_left;
+        column->m_right->m_left = column->m_left;
+        column->m_left->m_right = column->m_right;
         column->m_left = column->m_right = column;
     }
-
-    m_root = root;
 
     m_solution = make_shared<Answer>(startingSolution);
 
@@ -375,7 +377,7 @@ Coverings::Coverings(
 
 Coverings::~Coverings()
 {
-    m_worker.join();
+    m_worker.join(); // wait for the worker thread to finish
     for (auto col = m_root->m_right; col != m_root; )
     {
         for (auto e = col->m_down; e != col; )

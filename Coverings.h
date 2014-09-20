@@ -62,7 +62,6 @@ private:
 
     // state and state request related methods and variables.
     void respondToStateRequest( );
-    void lastResponseToStateRequest( );
 
     std::shared_ptr<Answer> m_solverState;
     bool m_stateRequest;
