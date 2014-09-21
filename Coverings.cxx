@@ -36,18 +36,13 @@ using namespace std;
 class Cell {
 public:
     Cell()
-        : m_col(nullptr), m_useCount(0), m_name(nullptr)
+        : m_col(nullptr), m_useCount(0)
     {
         // Regard a new cell as the head of an empty lined list.  Initially all links point to self.
         m_left = this;
         m_right = this;
         m_up = this;
         m_down = this;
-    }
-
-    ~Cell()
-    {
-        delete[] m_name;
     }
 
     // append "e" to end of doubly linked list formed using m_left/m_right members.
@@ -78,11 +73,10 @@ public:
     Cell* m_down;
     Cell* m_col;
 
-    std::shared_ptr< std::vector<std::string> > m_nameVector;
+    std::shared_ptr< std::vector<std::string> > m_rowNames;
 
 	unsigned int m_useCount;
 
-    char* m_name;  // tried using a string here but that slowed down run time 
 };
 
 // Remove a column (unlink it) from its Coverings object.  
@@ -234,13 +228,13 @@ void Coverings::recursiveSearch(unsigned int level)
         // we hit the first row in the starting solution.
         if (m_solution->size() > level)
         {
-            if (m_solution->getRow(level) != *(row->m_nameVector))
+            if (m_solution->getRow(level) != *(row->m_rowNames))
             {
                 continue;
             }
         } else
         {
-            m_solution->push_back(row->m_nameVector);
+            m_solution->push_back(row->m_rowNames);
         }
         unlinkRow(row);
         recursiveSearch(level+1);
@@ -258,19 +252,6 @@ void Coverings::search( )
     m_solutionQueue.push(shared_ptr<Answer>(nullptr));
     m_solverRunning = false;
     respondToStateRequest();
-}
-
-static shared_ptr< vector<string> > rowToNameVector(const Cell* row)
-{
-    auto res = make_shared<vector<string> >();
-    auto e = row; 
-    do {
-        res->push_back(e->m_col->m_name);
-        e=e->m_right;
-    } while ( e != row );
-
-    sort(res->begin(), res->end());
-    return res;
 }
 
 // Rows matrix has a row for every possible placement of every puzzle 
@@ -300,8 +281,6 @@ Coverings::Coverings(
     {
         auto column = new Cell();
         auto bufferSize = columns[col].size() + 1;
-        column->m_name = new char[bufferSize];
-        strncpy(column->m_name, columns[col].c_str(), bufferSize);
         columnMap[columns[col]] = column;  // save for lookup by name.
 
         m_root->horizontalAppend(column);
@@ -313,11 +292,20 @@ Coverings::Coverings(
     {
         Cell* firstInRow = nullptr;
         auto& oneRow = rows[row];
+
+        auto rowNames = make_shared<vector<string> >();
+        for (unsigned int eIndex = 0; eIndex < oneRow.size(); ++eIndex)
+        {
+            rowNames->push_back(oneRow[eIndex]);
+        } 
+        sort(rowNames->begin(), rowNames->end());
+
         // link up a Cell for each row entry that is used.
         for (unsigned int eIndex = 0; eIndex < oneRow.size(); ++eIndex)
         {
             auto column = columnMap[oneRow[eIndex]]; // lookup by cell name.
             auto e = new Cell();
+            e->m_rowNames = rowNames;
             column->verticalAppend(e);
             if (!firstInRow)
             {
@@ -327,15 +315,6 @@ Coverings::Coverings(
                 firstInRow->horizontalAppend(e);
             }
         }
-
-        // precompute the string based versions of each row. 
-        auto nameVector = rowToNameVector(firstInRow);
-        auto e = firstInRow; 
-        do {
-            e->m_nameVector = nameVector;
-            e = e->m_right;
-        } while ( e != firstInRow );
-
     }
 
     // detach the "secondary" columns.
