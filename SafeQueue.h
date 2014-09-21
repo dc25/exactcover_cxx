@@ -30,10 +30,24 @@ THE SOFTWARE.
 #include <condition_variable>
 
 template<class T> class SafeQueue {
+
 public:
+
+    SafeQueue() = delete;
+
+    SafeQueue(size_t capacity) 
+        : m_capacity(capacity)
+    {
+    }
+
     void push(const T &entry)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::unique_lock<std::mutex> lock(m_mutex);
+        while(m_queue.size() == m_capacity)
+        {
+            m_notFull.wait(lock);
+        }
+
         m_queue.push(entry);
         m_notEmpty.notify_one();
     }
@@ -64,13 +78,16 @@ public:
 
         T res = m_queue.front();
         m_queue.pop();
+        m_notFull.notify_one();
         return res;
     }
 
 private:
+    size_t        m_capacity;
     std::queue<T> m_queue;
     std::mutex    m_mutex;
     std::condition_variable m_notEmpty;
+    std::condition_variable m_notFull;
 };
 
 #endif // SAFE_QUEUE_H__

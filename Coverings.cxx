@@ -285,7 +285,7 @@ Coverings::Coverings(
     const std::vector< std::string >& columns,
     const std::vector< std::vector< std::string > >& startingSolution,
     unsigned int secondary)
-    : num_searches(0), m_stateRequest(false), m_solverRunning(false)
+    : num_searches(0), m_stateRequest(false), m_solverRunning(false), m_solutionQueue(128)
 {
     m_root = new Cell();
 
