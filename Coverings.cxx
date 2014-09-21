@@ -270,40 +270,33 @@ Coverings::Coverings(
 {
     m_root = new Cell();
 
-    auto colCount = columns.size();
-    auto rowCount = rows.size();
-
     // Short term map to identify by name which column a row entry belongs to.
     std::map<std::string, Cell*> columnMap;
 
     // Connect the column head links
-    for (unsigned int col = 0; col < colCount; ++col)
+    for (auto& columnName : columns)
     {
         auto column = new Cell();
-        auto bufferSize = columns[col].size() + 1;
-        columnMap[columns[col]] = column;  // save for lookup by name.
-
+        columnMap[columnName] = column;  // save for lookup by name.
         m_root->horizontalAppend(column);
-
     }
 
     // for each row ...
-    for (unsigned int row = 0; row < rowCount; ++row)
+    for (auto& oneRow : rows)
     {
         Cell* firstInRow = nullptr;
-        auto& oneRow = rows[row];
 
         auto rowNames = make_shared<vector<string> >();
-        for (unsigned int eIndex = 0; eIndex < oneRow.size(); ++eIndex)
+        for (auto& unitName : oneRow)
         {
-            rowNames->push_back(oneRow[eIndex]);
+            rowNames->push_back(unitName);
         } 
         sort(rowNames->begin(), rowNames->end());
 
         // link up a Cell for each row entry that is used.
-        for (unsigned int eIndex = 0; eIndex < oneRow.size(); ++eIndex)
+        for (auto& unitName : oneRow)
         {
-            auto column = columnMap[oneRow[eIndex]]; // lookup by cell name.
+            auto column = columnMap[unitName]; // lookup by cell name.
             auto e = new Cell();
             e->m_rowNames = rowNames;
             column->verticalAppend(e);
