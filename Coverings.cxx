@@ -208,28 +208,6 @@ void Coverings::respondToStateRequest( )
     }
 }
 
-// return true if vectors in strings are equal; false otherwise.
-static bool equalStringVectors(
-    const vector<string>& v0, 
-    const vector<string>& v1)
-{
-
-    if (v0.size() != v1.size())
-    {
-        return false;
-    }
-
-    for (size_t i = 0; i < v0.size(); ++i)
-    {
-        if (v0[i] != v1[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-
 void Coverings::recursiveSearch(unsigned int level)
 {
     respondToStateRequest();
@@ -256,7 +234,7 @@ void Coverings::recursiveSearch(unsigned int level)
         // we hit the first row in the starting solution.
         if (m_solution->size() > level)
         {
-            if (!equalStringVectors(m_solution->getRow(level), *(row->m_nameVector)))
+            if (m_solution->getRow(level) != *(row->m_nameVector))
             {
                 continue;
             }
