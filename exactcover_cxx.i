@@ -24,7 +24,7 @@ THE SOFTWARE.
 /* exactcover_cxx.i */
 %module exactcover_cxx
 %{
-#include "Answer.h"
+#include "Solution.h"
 #include "Coverings.h"
 %}
 
@@ -38,6 +38,6 @@ namespace std {
 }   
 %shared_ptr(Solution)
 
-%include "Answer.h"
+%include "Solution.h"
 %include "Coverings.h"
 

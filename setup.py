@@ -18,7 +18,7 @@ setup(name='exactcover_cxx',
       py_modules=['exactcover_cxx'],
       ext_modules=[
           Extension('_exactcover_cxx', 
-              ['Answer.cxx', 'Coverings.cxx', 'exactcover_cxx.i'], 
+              ['Solution.cxx', 'Coverings.cxx', 'exactcover_cxx.i'], 
               extra_compile_args=extra_compile_args, 
               swig_opts=['-threads', '-c++'])],
      )

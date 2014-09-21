@@ -22,7 +22,7 @@ THE SOFTWARE.
 */
 
 #include "Coverings.h"
-#include "Answer.h"
+#include "Solution.h"
 #include <string.h>
 #include <vector>
 #include <map>
