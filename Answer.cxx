@@ -27,12 +27,12 @@ THE SOFTWARE.
 using namespace std;
 
 // 
-// Initialize an Answer from a vector of vectors of strings.
-// The contents of the Answer are the same as the "vvs" argument 
+// Initialize a Solution from a vector of vectors of strings.
+// The contents of the Solution are the same as the "vvs" argument 
 // except that the outer vector becomes a vector of pointers to 
 // vectors of strings and the strings in the inner vector are sorted.
 //
-Answer::Answer(const vector< vector<string> >& vvs)
+Solution::Solution(const vector< vector<string> >& vvs)
 {
     for (auto vs : vvs)
     {

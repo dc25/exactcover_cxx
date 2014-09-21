@@ -150,14 +150,14 @@ Cell* Coverings::smallestCol( ) const
     return smallest;
 }
 
-shared_ptr<Answer> Coverings::getSolution() 
+shared_ptr<Solution> Coverings::getSolution() 
 {
     return m_solutionQueue.deque();
 }
 
 // Set bool to request state from solver thread.  Wait for solver thread
 // to save current state and reset bool indicating that state is ready.
-std::shared_ptr<Answer> Coverings::getState()
+std::shared_ptr<Solution> Coverings::getState()
 {
     std::unique_lock<std::mutex> lock(m_stateRequestMutex);
 
@@ -168,7 +168,7 @@ std::shared_ptr<Answer> Coverings::getState()
         if (m_solverState == nullptr)
         {
             // Otherwise, return the current solution in progress.
-            m_solverState = make_shared<Answer>(*m_solution);
+            m_solverState = make_shared<Solution>(*m_solution);
         }
         return m_solverState;
     } 
@@ -194,7 +194,7 @@ void Coverings::respondToStateRequest( )
         if (m_solverState == nullptr)
         {
             // Otherwise, return the current solution in progress.
-            m_solverState = make_shared<Answer>(*m_solution);
+            m_solverState = make_shared<Solution>(*m_solution);
         }
         // tell waiting thread the wait is over and a state is available.
         m_stateRequest = false;
@@ -208,7 +208,7 @@ void Coverings::recursiveSearch(unsigned int level)
 
     if (m_root == m_root->m_right)
     {
-        m_solutionQueue.push(make_shared<Answer>(*m_solution));
+        m_solutionQueue.push(make_shared<Solution>(*m_solution));
         return;
     }
 
@@ -249,7 +249,7 @@ void Coverings::search( )
 {
     m_solverRunning = true;
     recursiveSearch(0);
-    m_solutionQueue.push(shared_ptr<Answer>(nullptr));
+    m_solutionQueue.push(shared_ptr<Solution>(nullptr));
     m_solverRunning = false;
     respondToStateRequest();
 }
@@ -319,7 +319,7 @@ Coverings::Coverings(
         column->m_left = column->m_right = column;
     }
 
-    m_solution = make_shared<Answer>(startingSolution);
+    m_solution = make_shared<Solution>(startingSolution);
 
     // The search is on... in a new thread.
     m_worker = std::thread(&Coverings::search, this);

@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "SafeQueue.h"
 
 class Cell;
-class Answer;
+class Solution;
 
 class Coverings 
 {
@@ -44,8 +44,8 @@ public:
 
     ~Coverings();
 
-    std::shared_ptr<Answer> getSolution();
-    std::shared_ptr<Answer> getState();
+    std::shared_ptr<Solution> getSolution();
+    std::shared_ptr<Solution> getState();
 
     unsigned long long int num_searches;
 
@@ -55,15 +55,15 @@ private:
     void search();
 
     Cell* m_root;  // entry to the sparse matrix of cells.
-    std::shared_ptr<Answer> m_solution;
-    SafeQueue<std::shared_ptr<Answer> >  m_solutionQueue;
+    std::shared_ptr<Solution> m_solution;
+    SafeQueue<std::shared_ptr<Solution> >  m_solutionQueue;
 
     std::thread m_worker;
 
     // state and state request related methods and variables.
     void respondToStateRequest( );
 
-    std::shared_ptr<Answer> m_solverState;
+    std::shared_ptr<Solution> m_solverState;
     bool m_stateRequest;
     bool m_solverRunning;
     std::mutex m_stateRequestMutex;

@@ -36,7 +36,7 @@ namespace std {
 %template(stringVector)  vector < string >;
 %template(stringArray)  vector< vector < string > >;
 }   
-%shared_ptr(Answer)
+%shared_ptr(Solution)
 
 %include "Answer.h"
 %include "Coverings.h"

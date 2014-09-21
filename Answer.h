@@ -28,9 +28,9 @@ THE SOFTWARE.
 #include <vector>
 #include <memory>
 
-class Answer {
+class Solution {
 public:
-    Answer(const std::vector< std::vector<std::string> >& vvs);
+    Solution(const std::vector< std::vector<std::string> >& vvs);
 
     size_t size() const
     {
