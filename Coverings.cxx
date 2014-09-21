@@ -38,7 +38,7 @@ public:
     Cell()
         : m_col(nullptr), m_useCount(0)
     {
-        // Regard a new cell as the head of an empty lined list.  Initially all links point to self.
+        // Regard a new cell as the head of an empty linked list.  Initially all links point to self.
         m_left = this;
         m_right = this;
         m_up = this;
