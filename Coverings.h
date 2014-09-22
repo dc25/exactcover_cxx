@@ -32,12 +32,32 @@ THE SOFTWARE.
 class Cell;
 class Solution;
 
+/* 
+ * An object of type Coverings works with "Polyform Puzzler" to solve
+ * an exact cover puzzle.  When a Coverings object is created it 
+ * immediately starts to solve the specified puzzle in a separate thread.
+ *
+ * Solutions can be retrieved using getSolution() which returns a smart pointer
+ * to a Solution object.  After the last solution is found, getSolution() returns
+ * a null pointer.  If the solver is not done but no solutions are queued then 
+ * getSolution() blocks.
+ *
+ * The non-blocking method, getState(), also returns a solution (which may 
+ * or may not be complete).  This is to be used when restarting the solver
+ * If there is a queued solution, then getState() returns that but does not
+ * remove it from the queue.  Otherwise, getState() returns the 
+ * incomplete solution in progress.
+ *
+ * Class Coverings is accessible in python in addition to c++.  This is
+ * accomplished using swig.
+ */
+
 class Coverings 
 {
 public:
 
     Coverings(
-        const std::vector< std::vector< std::string > >& usage,
+        const std::vector< std::vector< std::string > >& rows,
         const std::vector< std::string >& columns,
         const std::vector< std::vector< std::string > >& startingSolution,
         unsigned int secondary=0);

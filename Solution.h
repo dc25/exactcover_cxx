@@ -28,6 +28,21 @@ THE SOFTWARE.
 #include <vector>
 #include <memory>
 
+/*
+ * This class, Solution, exists to hold a solution to the exact cover
+ * puzzle.  A solution consists of a vector of (pointers to) rows.
+ * Each row is a vector of strings.  The strings in a row are the names
+ * of the spots that get covered or uncovered together by one puzzle
+ * piece.
+ *
+ * The public functionality for class Solution are accessible in python
+ * as well as c++.  This is accomplished using swig.
+ *
+ * In the exactcover_cxx module, the solver builds a solution one row
+ * at a time.  When a solution is complete, a copy gets made and put
+ * into a solution queue.
+ */
+
 class Solution {
 public:
     Solution(const std::vector< std::vector<std::string> >& vvs);

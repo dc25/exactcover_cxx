@@ -33,6 +33,11 @@ THE SOFTWARE.
 
 using namespace std;
 
+//
+// Objects of type Cell represent a single cell 
+// in the "dancing links" sparse matrix.  Each 
+// cell is part of two doubly linked lists.
+//
 class Cell {
 public:
     Cell()
@@ -73,9 +78,9 @@ public:
     Cell* m_down;
     Cell* m_col;
 
-    std::shared_ptr< std::vector<std::string> > m_rowNames;
+    std::shared_ptr< std::vector<std::string> > m_rowNames;  // row cells only.
 
-	unsigned int m_useCount;
+	unsigned int m_useCount;  // column cells only.
 
 };
 
@@ -137,6 +142,10 @@ static void linkRow(Cell* row)
     }
 }
 
+// 
+// Iterate over columns to find the one with lowest useCount (indicating 
+// the fewest rows ).
+//
 Cell* Coverings::smallestCol( ) const
 {
     Cell* smallest = nullptr;
@@ -150,13 +159,20 @@ Cell* Coverings::smallestCol( ) const
     return smallest;
 }
 
+//
+// This method, getSolution() is called from python to get the 
+// next solution in the queue.  The call blocks if there is no
+// solution in the queue.  The queue itself is thread safe.
+//
 shared_ptr<Solution> Coverings::getSolution() 
 {
     return m_solutionQueue.deque();
 }
 
+//
 // Set bool to request state from solver thread.  Wait for solver thread
-// to save current state and reset bool indicating that state is ready.
+// to assign m_solverState and reset bool indicating that state is ready.
+//
 std::shared_ptr<Solution> Coverings::getState()
 {
     std::unique_lock<std::mutex> lock(m_stateRequestMutex);
@@ -182,8 +198,10 @@ std::shared_ptr<Solution> Coverings::getState()
     return m_solverState;
 }
 
+//
 // Check for a request for current state.  If request was made, then
 // make the state, and notify the requester that the state is ready.
+//
 void Coverings::respondToStateRequest( )
 {
     std::lock_guard<std::mutex> lock(m_stateRequestMutex);
@@ -202,9 +220,15 @@ void Coverings::respondToStateRequest( )
     }
 }
 
+//
+//This function, recursiveSearch(), implements the dancing links
+//algorithm to search for exact cover solutions.  
+//
 void Coverings::recursiveSearch(unsigned int level)
 {
-    respondToStateRequest();
+    // If state requested, prepare state and 
+    // notify waiting thread that state is ready.
+    respondToStateRequest();  
 
     if (m_root == m_root->m_right)
     {
@@ -224,8 +248,9 @@ void Coverings::recursiveSearch(unsigned int level)
 
     for (auto row = smallest->m_down; row != smallest; row = row->m_down)
     {
-        // if we have a starting solution, then fast forward loop until
-        // we hit the first row in the starting solution.
+        // If we have a starting solution, then fast forward loop (i.e. 
+        // don't bother with recursing ) until we hit the first row in 
+        // the starting solution.
         if (m_solution->size() > level)
         {
             if (m_solution->getRow(level) != *(row->m_rowNames))
@@ -249,18 +274,19 @@ void Coverings::search( )
 {
     m_solverRunning = true;
     recursiveSearch(0);
-    m_solutionQueue.push(shared_ptr<Solution>(nullptr));
+    m_solutionQueue.push(shared_ptr<Solution>(nullptr)); //terminator
     m_solverRunning = false;
-    respondToStateRequest();
+    respondToStateRequest();  
 }
 
+//
 // Rows matrix has a row for every possible placement of every puzzle 
 // piece.  Each row in the rows matrix contains the name of the piece 
 // and the name of every "cell" of the puzzle that this piece occupies 
 // for this row's placement.  The columns vector has the names of all 
-// the pieces and "cells" of the puzzle.  Really, the naming convention 
-// is arbitrary but the columns should contain all of the names that 
-// are used in all of the rows.
+// the pieces and "cells" of the puzzle.  The startingSolution vector 
+// is used when restarting.  
+//
 Coverings::Coverings(
     const std::vector< std::vector< std::string > >& rows,
     const std::vector< std::string >& columns,
