@@ -43,14 +43,6 @@ To build on Windows you will need
 * swig - I used swig 2.0.12 .
 
 
-To build/install the extension on Linux bring up an interactive shell.
-Change your working directory to the src directory.
-
-Now type:
-
-python setup.py build_ext
-python setup.py install
-
 The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
 
 To build/install the extension on windows, first bring up a "Developer 
@@ -68,11 +60,14 @@ Change your working directory to the src directory.
 
 Now type:
 
+```
 python setup.py build_ext
 python setup.py install
+```
 
 The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
 
+###Testing
 
 Once you have built using any of the above methods you should be able to test
 your build by running "python pentominoes.py" from the command line. You
@@ -80,6 +75,7 @@ should see the following output.
 
 Example covering:
 
+```
 llxuuvvv
 lxxxuvzz
 lfxuuvzn
@@ -88,6 +84,7 @@ ffy  wnn
 yyyywwnt
 pppwwttt
 ppiiiiit
+```
 
 I copied the pentominos.py script from https://github.com/kwaters/exactcover
 which is a similar project to this one.
