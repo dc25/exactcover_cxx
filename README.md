@@ -42,7 +42,7 @@ To build on Windows you will need
 * A version of Microsoft Visual Studio that supports c++11 - I used Visual Studio 2013 Express Edition (available for free download).
 * swig - I downloaded [swigwin-3.0.2](http://prdownloads.sourceforge.net/swig/swigwin-3.0.2.zip) which includes a prebuilt windows executable.
 
-To build/install the extension on windows, first bring up a windows command prompt. If necessary, modify your PATH environment variable to include the folder containing swig.exe .  You will also need to set the VS90COMNTOOLS environment variable as follows:
+To build/install the extension on windows, first bring up a windows command prompt. If necessary, modify your PATH environment variable to include the folders containing python.exe and swig.exe .  You will also need to set the VS90COMNTOOLS environment variable as follows:
 
 For Visual Studio 2013 users:
 ```
@@ -69,9 +69,7 @@ The first command will build the extension.  You will see a few warnings but no 
 
 ###Testing
 
-Once you have built using any of the above methods you should be able to test
-your build by running "python pentominoes.py" from the command line. You
-should see the following output.
+Once you have built using any of the above methods you should be able to test your build by running "python tests/pentominoes.py" from the command line. You should see the following output.
 
 Example covering:
 
