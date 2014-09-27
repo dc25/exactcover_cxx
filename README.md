@@ -1,8 +1,8 @@
 # Extension Module: exactcover_cxx 
 ## Overview
 
-This project contains a c++ implementation of Donald Knuth's dancing links 
-algorithm and a swig based python interface to allow access to it using python.
+This project contains a c++ implementation of [Donald Knuth's Dancing Links 
+Method for solving the exact cover problem](http://arxiv.org/pdf/cs.DS/0011047.pdf)and a swig based python interface to allow access to it using python.
 
 The python interface is written to be easily used by [David Goodger's Polyform
 Puzzler](http://sourceforge.net/projects/puzzler/)
