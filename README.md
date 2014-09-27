@@ -4,8 +4,8 @@
 This project contains a c++ implementation of Donald Knuth's dancing links 
 algorithm and a swig based python interface to allow access to it using python.
 
-The python interface is written to be easily used by David Goodger's Polyform
-Puzzler project: http://sourceforge.net/projects/puzzler/
+The python interface is written to be easily used by [David Goodger's Polyform
+Puzzler](http://sourceforge.net/projects/puzzler/)
 
 Integrating this module into Polyform Puzzler results in faster run times.
 
