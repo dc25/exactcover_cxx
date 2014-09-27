@@ -29,8 +29,10 @@ Change your working directory to the src directory.
 
 Now type:
 
+```
 python setup.py build_ext
 python setup.py install
+```
 
 The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
 
