@@ -166,17 +166,23 @@ def main():
     c = columns(m)
     startingSolution = [ ]
 
-    print "Example covering:"
-    # Take the first result from the iterator.
     solver = exactcover_cxx.Coverings(m, c, startingSolution)
+
+    # Take the first result 
+    solution = solver.getSolution()
+    if solution is None:
+        print "No results found."
+        return
+
+    print "Example covering:"
+    print
+    print solution_str(solution)
+    print 
 
     while (1):
         solution = solver.getSolution()
         if solution is None:
             return
-        print
-        print solution_str(solution)
-        print 
 
     # Count the number of results returned by the iterator.
     # print "There are {0} unique tilings.".format(
