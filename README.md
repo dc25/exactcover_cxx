@@ -69,11 +69,13 @@ The first command will build the extension.  You will see a few warnings but no 
 
 ###Testing
 
-Once you have built using any of the above methods you should be able to test your build by running "python tests/pentominoes.py" from the command line. You should see the following output.
+After building you should be able to test your build by running "python tests/pentominoes.py" from the command line. You should see the following output.
 
-Example covering:
 
 ```
+Example covering:
+
+
 llxuuvvv
 lxxxuvzz
 lfxuuvzn
