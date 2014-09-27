@@ -39,7 +39,8 @@ The first command will build the extension.  You will see a few warnings but no 
 ### Building on Windows
 To build on Windows you will need 
 * The python development environment - I used python 2.7.8
-* A version of Microsoft Visual Studio that supports c++11 - I used Visual Studio 2013 Express Edition (available for free download).
+* A version of Microsoft Visual Studio that supports c++11 
+  I used Visual Studio 2013 Express Edition (available for free download).
 * swig - I used swig 2.0.12 .
 
 
