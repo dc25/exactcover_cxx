@@ -39,8 +39,7 @@ The first command will build the extension.  You will see a few warnings but no 
 ### Building on Windows
 To build on Windows you will need 
 * The python development environment - I used python 2.7.8
-* A version of Microsoft Visual Studio that supports c++11 
-  I used Visual Studio 2013 Express Edition (available for free download).
+* A version of Microsoft Visual Studio that supports c++11 - I used Visual Studio 2013 Express Edition (available for free download).
 * swig - I used swig 2.0.12 .
 
 
@@ -59,19 +58,21 @@ Command Prompt for VS2012". This can be found in your start menu if you
 have installed Visual Studio 2012 Express Edition.  You will need to set an 
 environment variable for setup.py to work correctly:
 
+```
 SET VS90COMNTOOLS=%VS110COMNTOOLS% 
+```
 
-Once this is done, the build process should be the same on windows as on linux.
+*(from this point on the build process is the same on Windows as on Linux)*
 
-If you prefer, VS2012 Express Edition solution/project files are available for
-windows and a makefile is available that should work on Linux.
+Change your working directory to the src directory.
 
-The windows solution/project files are : exactcover_cxx.sln and 
-exactcover_cxx.vcxproj .   If you go that route, you may need to 
-specify the directories where the Python include and library files 
-are to be found.  The prebuilt Python distributions do not come with
-a debug version of the python library so you will probably need to specify 
-the "Solution Configuration", "Release" from within Visual Studio.
+Now type:
+
+python setup.py build_ext
+python setup.py install
+
+The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
+
 
 Once you have built using any of the above methods you should be able to test
 your build by running "python pentominoes.py" from the command line. You
