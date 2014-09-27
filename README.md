@@ -2,7 +2,7 @@
 ## Overview
 
 This project contains a c++ implementation of [Donald Knuth's Dancing Links 
-Method](http://arxiv.org/pdf/cs.DS/0011047.pdf) for solving the exact cover problem and a [swig](http://www.swig.org) based python interface to allow access to it using python.
+Method for solving the exact cover problem](http://arxiv.org/pdf/cs.DS/0011047.pdf) and a [swig](http://www.swig.org) based python interface to allow access to it using python.
 
 The python interface is written to be easily used by [David Goodger's Polyform
 Puzzler](http://sourceforge.net/projects/puzzler/)
@@ -40,16 +40,20 @@ The first command will build the extension.  You will see a few warnings but no 
 To build on Windows you will need 
 * The python development environment - I used python 2.7.8
 * A version of Microsoft Visual Studio that supports c++11 - I used Visual Studio 2013 Express Edition (available for free download).
-* swig - I used swig 2.0.12 .
+* swig - I downloaded [swigwin-3.0.2](http://prdownloads.sourceforge.net/swig/swigwin-3.0.2.zip) which includes a prebuilt windows executable.
 
 
 The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
 
-To build/install the extension on windows, first bring up a "Developer 
-Command Prompt for VS2012". This can be found in your start menu if you 
-have installed Visual Studio 2012 Express Edition.  You will need to set an 
-environment variable for setup.py to work correctly:
+To build/install the extension on windows, first bring up a Visual Studio "Developer Command Prompt". This can be found in your tart menu if you have installed Visual Studio Express Edition.  You will need to set an environment variable for setup.py to work correctly:
 
+
+For Visual Studio 2013 users:
+```
+SET VS90COMNTOOLS=%VS120COMNTOOLS%
+```
+
+For Visual Studio 2012 users:
 ```
 SET VS90COMNTOOLS=%VS110COMNTOOLS% 
 ```
