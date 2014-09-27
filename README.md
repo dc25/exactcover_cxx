@@ -1,3 +1,5 @@
+# Polyform Puzzler Extension Module: exactcover_cxx 
+
 This project contains a c++ implementation of Donald Knuth's dancing links 
 algorithm and a swig based python interface to allow access to it using python.
 
