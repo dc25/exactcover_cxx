@@ -19,9 +19,9 @@ The code builds and has been tested on Windows (windows7) and Linux (Ubuntu
 I used Visual Studio 2013 Express Edition on windows and gcc 4.7.3 on Linux.
 ### Building on Linux
 To build on Linux you will need 
-    - the python development environment - I used python 2.7.5
-    - g++ - I used gcc 4.7.3
-    - swig - I used swig 2.0.8
+    * the python development environment - I used python 2.7.5
+    * g++ - I used gcc 4.7.3
+    * swig - I used swig 2.0.8
 
 
 To build/install the extension on Linux bring up an interactive shell.
