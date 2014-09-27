@@ -2,7 +2,7 @@
 ## Overview
 
 This project contains a c++ implementation of [Donald Knuth's Dancing Links 
-Method for solving the exact cover problem](http://arxiv.org/pdf/cs.DS/0011047.pdf) and a [www.swig.org](swig) based python interface to allow access to it using python.
+Method for solving the exact cover problem](http://arxiv.org/pdf/cs.DS/0011047.pdf) and a [swig](www.swig.org) based python interface to allow access to it using python.
 
 The python interface is written to be easily used by [David Goodger's Polyform
 Puzzler](http://sourceforge.net/projects/puzzler/)
