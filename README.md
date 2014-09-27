@@ -21,7 +21,7 @@ To build on Linux you will need
 * g++ - I used gcc 4.7.3
 * swig - I used swig 2.0.8
 
-All of the above are available using apt-get.
+All of the above are available from apt-get.
 
 To build/install the extension on Linux bring up an interactive shell.
 Change your working directory to the src directory.
