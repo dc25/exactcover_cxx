@@ -42,11 +42,7 @@ To build on Windows you will need
 * A version of Microsoft Visual Studio that supports c++11 - I used Visual Studio 2013 Express Edition (available for free download).
 * swig - I downloaded [swigwin-3.0.2](http://prdownloads.sourceforge.net/swig/swigwin-3.0.2.zip) which includes a prebuilt windows executable.
 
-
-The first command will build the extension.  You will see a few warnings but no errors.  The second command will add the extension to your python environment.
-
-To build/install the extension on windows, first bring up a Visual Studio "Developer Command Prompt". This can be found in your tart menu if you have installed Visual Studio Express Edition.  You will need to set an environment variable for setup.py to work correctly:
-
+To build/install the extension on windows, first bring up a windows command prompt. If necessary, modify your PATH environment variable to include the folder containing swig.exe .  You will also need to set the VS90COMNTOOLS environment variable as follows:
 
 For Visual Studio 2013 users:
 ```
