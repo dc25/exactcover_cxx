@@ -29,10 +29,14 @@ THE SOFTWARE.
 #include <mutex>
 #include <condition_variable>
 
+/*
+ * Thread safe queue of limited size.
+ */
 template<class T> class SafeQueue {
 
 public:
 
+    // No default constructor - capacity must be specified.
     SafeQueue() = delete;
 
     SafeQueue(size_t capacity) 
@@ -40,6 +44,10 @@ public:
     {
     }
 
+    /*
+     * Make a copy of 'entry' onto the queue.  If queue
+     * is full then block until there is room available.
+     */
     void push(const T &entry)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -52,21 +60,25 @@ public:
         m_notEmpty.notify_one();
     }
 
-    T front()
+    /*
+     * Copy the front of the queue to argument 'result'
+     * Return false if the queue is empty.
+     */
+    bool front(T &result)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        // default constructor should be a "NULL" T type.
-        T res;
         if (m_queue.empty())
         {
-            assert(!res);
-        } else
-        {
-            res = m_queue.front();
-        }
-        return res;
+            return false;
+        } 
+        result = m_queue.front();
+        return true;
     }
 
+    /*
+     * Remove and return the front queue entry.
+     * If the queue is empty then block until not empty.
+     */
     T deque()
     {
 

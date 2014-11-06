@@ -180,12 +180,12 @@ std::shared_ptr<Solution> Coverings::getState()
     if (!m_solverRunning)
     {
         // Return the oldest unprocessed solution if any.
-        m_solverState = m_solutionQueue.front();
-        if (m_solverState == nullptr)
+        if (m_solutionQueue.front(m_solverState))
         {
-            // Otherwise, return the current solution in progress.
-            m_solverState = make_shared<Solution>(*m_solution);
+            return m_solverState;
         }
+        // Otherwise, return the current solution in progress.
+        m_solverState = make_shared<Solution>(*m_solution);
         return m_solverState;
     } 
 
@@ -208,8 +208,7 @@ void Coverings::respondToStateRequest( )
     if (m_stateRequest)
     {
         // Return the oldest unprocessed solution if any.
-        m_solverState = m_solutionQueue.front();
-        if (m_solverState == nullptr)
+        if (!m_solutionQueue.front(m_solverState))
         {
             // Otherwise, return the current solution in progress.
             m_solverState = make_shared<Solution>(*m_solution);
