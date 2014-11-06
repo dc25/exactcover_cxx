@@ -13,16 +13,15 @@ Integrating this module into Polyform Puzzler results in faster run times.
 
 The code makes use of language features that require C++11 ( or later ).
 
-The code builds and has been tested on Windows (windows7) and Linux (Ubuntu 
-13.04 )
+The code builds and has been tested on Windows (windows7) and Linux (Ubuntu 13.04 )
 
-I used Visual Studio 2013 Express Edition on windows and gcc 4.7.3 on Linux.
 ### Building on Linux
 To build on Linux you will need 
 * the python development environment - I used python 2.7.5
 * g++ - I used gcc 4.7.3
 * swig - I used swig 2.0.8
 
+All of the above are available from apt-get.
 
 To build/install the extension on Linux bring up an interactive shell.
 Change your working directory to the src directory.
@@ -69,11 +68,13 @@ The first command will build the extension.  You will see a few warnings but no 
 
 ###Testing
 
-Once you have built using any of the above methods you should be able to test your build by running "python tests/pentominoes.py" from the command line. You should see the following output.
+After building you should be able to test your build by running "python tests/pentominoes.py" from the command line. You should see the following output.
 
-Example covering:
 
 ```
+Example covering:
+
+
 llxuuvvv
 lxxxuvzz
 lfxuuvzn
